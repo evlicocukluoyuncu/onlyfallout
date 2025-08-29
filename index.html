@@ -1,124 +1,70 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
+  <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>onlyfallout.com — Fallout Timeline</title>
+  <title>onlyfallout.com — Please Stand By</title>
+  <meta name="description" content="onlyfallout.com — Fallout timelines are loading. Please stand by." />
   <style>
-    body { margin:0; font-family: system-ui, sans-serif; background:#0b0f19; color:#e5e7eb; }
-    header { position:sticky; top:0; background:#0b0f19cc; backdrop-filter: blur(8px); border-bottom:1px solid #1e293b; padding:10px 20px; display:flex; align-items:center; justify-content:space-between; }
-    header h1 { margin:0; font-size:18px; font-weight:bold; }
-    header span{color:#22d3ee}
-    .zoom { display:flex; align-items:center; gap:6px; color:#94a3b8; font-size:14px; }
-    input[type=range]{ accent-color:#22d3ee; }
-    .container { overflow-x:auto; overflow-y:visible; border-top:1px solid #1e293b; border-bottom:1px solid #1e293b; }
-    .track { position:relative; height:160px; }
-    .line { position:absolute; top:50%; transform:translateY(-50%); height:6px; background:#1e293b; border-radius:4px; }
-    .line.fill { background:#22d3ee; }
-    .dot { position:absolute; top:50%; transform:translate(-50%,-50%); width:12px; height:12px; border-radius:50%; cursor:pointer; border:2px solid #0b0f19; }
-    .dot.world { background:#22d3ee; }
-    .dot.fallout { background:#4ade80; }
-    .popup { position:absolute; width:280px; background:#0f172a; border:1px solid #334155; border-radius:12px; padding:12px; box-shadow:0 8px 20px rgba(0,0,0,0.5); }
-    .popup h3 { margin:0 0 6px; font-size:16px; color:#fff; }
-    .popup p { margin:0; font-size:14px; color:#cbd5e1; }
-    .popup .date{font-size:12px;color:#94a3b8;margin-bottom:4px}
-    footer { text-align:center; padding:20px; color:#94a3b8; font-size:13px; }
+    :root{
+      --bg: #0b0f19;
+      --text: #e5e7eb;
+      --muted: #94a3b8;
+      --accent: #22d3ee;
+    }
+    html,body{height:100%;margin:0}
+    body{
+      background:var(--bg);
+      color:var(--text);
+      font: 16px/1.5 system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, "Apple Color Emoji","Segoe UI Emoji";
+      display:grid; place-items:center;
+    }
+    .wrap{
+      text-align:center;
+      padding:40px 20px;
+      max-width:760px;
+    }
+    .logo{
+      width:min(260px, 60vw);
+      height:auto;
+      border-radius:12px;
+      display:block;
+      margin:0 auto 18px;
+    }
+    h1{
+      font-size:clamp(28px, 4vw, 48px);
+      line-height:1.1;
+      margin:0 0 10px;
+      letter-spacing:.3px;
+    }
+    .sub{
+      color:var(--muted);
+      font-size:clamp(14px, 2vw, 18px);
+      margin:0 0 24px;
+    }
+    .chip{
+      display:inline-block;
+      padding:8px 12px;
+      border:1px solid rgba(255,255,255,.12);
+      border-radius:999px;
+      color:var(--text);
+      text-decoration:none;
+    }
+    footer{
+      position:fixed; left:0; right:0; bottom:10px;
+      text-align:center; color:var(--muted); font-size:12px;
+    }
   </style>
 </head>
 <body>
-  <header>
-    <h1>onlyfallout<span>.com</span></h1>
-    <div class="zoom">Zoom <input type="range" id="zoom" min="5" max="50" value="20"></div>
-  </header>
-
-  <div class="container">
-    <div id="timeline" style="position:relative; height:360px; min-width:1200px;"></div>
-  </div>
-
-  <footer>
-    © <span id="year"></span> onlyfallout.com — Fan-made, unofficial. Lore belongs to Bethesda/Interplay. This site is for educational/archival purposes.
-  </footer>
-
-  <script>
-    const START = new Date('1900-01-01');
-    const END   = new Date('2300-01-01');
-    const TODAY = new Date();
-
-    const events = [
-      {id:'w1', type:'world', date:'1945-08-06', title:'WWII milestone', details:'Example placeholder.'},
-      {id:'w2', type:'world', date: TODAY.toISOString().slice(0,10), title:'Today', details:'Current day marker.'},
-      {id:'f1', type:'fallout', date:'2052-01-01', title:'Resource Wars begin', details:'Placeholder lore.'},
-      {id:'f2', type:'fallout', date:'2077-10-23', title:'Great War', details:'Two-hour nuclear exchange.'},
-      {id:'f3', type:'fallout', date:'2102-10-23', title:'Vault 76 opens', details:'Reclamation Day (Fallout 76).'},
-      {id:'f4', type:'fallout', date:'2287-10-23', title:'Sole Survivor awakens', details:'Approx. Fallout 4.'},
-      {id:'f5', type:'fallout', date:'2296-01-01', title:'Fallout TV series events', details:'Placeholder for TV series timeline.'}
-    ];
-
-    const pxPerYearDefault = 20;
-    let pxPerYear = pxPerYearDefault;
-
-    const timeline = document.getElementById('timeline');
-    const zoom = document.getElementById('zoom');
-
-    function yearsBetween(a,b){return (b-a)/(1000*60*60*24*365.2425)}
-    function xForDate(d){return yearsBetween(START,new Date(d))*pxPerYear}
-
-    function render(){
-      timeline.innerHTML='';
-      const width = yearsBetween(START,END)*pxPerYear;
-      timeline.style.width=width+"px";
-
-      // World line
-      const worldLine=document.createElement('div');
-      worldLine.className='line';
-      worldLine.style.left='0';
-      worldLine.style.width=xForDate(TODAY)+'px';
-      worldLine.style.top='80px';
-      timeline.appendChild(worldLine);
-
-      // Fallout line
-      const fallLine=document.createElement('div');
-      fallLine.className='line';
-      fallLine.style.left='0';
-      fallLine.style.width=width+'px';
-      fallLine.style.top='260px';
-      timeline.appendChild(fallLine);
-
-      events.forEach(ev=>{
-        const dot=document.createElement('div');
-        dot.className='dot '+ev.type;
-        dot.style.left=xForDate(ev.date)+'px';
-        dot.style.top=(ev.type==='world'?'80':'260')+'px';
-        dot.onclick=()=>showPopup(ev, dot);
-        timeline.appendChild(dot);
-      });
-    }
-
-    function showPopup(ev, anchor){
-      closePopup();
-      const pop=document.createElement('div');
-      pop.className='popup';
-      pop.innerHTML='<div class="date">'+ev.date+'</div><h3>'+ev.title+'</h3><p>'+ev.details+'</p>';
-      const left=anchor.offsetLeft;
-      if(ev.type==='world'){
-        pop.style.top=(80-12-150)+'px';
-      } else {
-        pop.style.top=(260+12)+'px';
-      }
-      pop.style.left=(left-140)+'px';
-      pop.id='activePopup';
-      timeline.appendChild(pop);
-    }
-
-    function closePopup(){
-      const old=document.getElementById('activePopup');
-      if(old) old.remove();
-    }
-
-    zoom.oninput=()=>{ pxPerYear=+zoom.value; render(); };
-
-    render();
-    document.getElementById('year').textContent=new Date().getFullYear();
-  </script>
+  <main class="wrap" role="main" aria-label="Under construction">
+    <img class="logo" src="/images/please-stand-by.gif" alt="Vault Boy — Please stand by" />
+    <h1>PLEASE STAND BY</h1>
+    <p class="sub">Our Pip-Boy is calibrating and the wasteland is <em>under reconstruction</em>.<br/> 
+    The Fallout mega-timeline will unlock soon.</p>
+    <a class="chip" href="mailto:info@onlyfallout.com">Want to help? Ping us</a>
+  </main>
+  <footer>© <span id="y"></span> onlyfallout.com — Fan-made, unofficial. Fallout lore © their respective owners.</footer>
+  <script>document.getElementById('y').textContent=new Date().getFullYear()</script>
 </body>
 </html>
