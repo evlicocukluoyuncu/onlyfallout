@@ -1,0 +1,282 @@
+[
+  {
+    "id": "f1",
+    "date": "2052-01-01",
+    "precision": "day",
+    "display_date": "2052-01-01",
+    "title": "Resource Wars",
+    "details": "Resource Wars begin over dwindling oil and uranium reserves.",
+    "game": [
+      "PRW"
+    ],
+    "factions": [
+      "UN",
+      "China",
+      "US Govt"
+    ],
+    "keywords": [
+      "oil",
+      "war",
+      "global"
+    ],
+    "images": [
+      "/images/f1/cover.webp"
+    ],
+    "related_ids": [],
+    "canon": "canon",
+    "period": "pre-war"
+  },
+  {
+    "id": "f2",
+    "date": "2065-01-01",
+    "precision": "month",
+    "display_date": "January 2065",
+    "title": "Vault 76 Construction",
+    "details": "Vault 76 Begins Construction",
+    "game": [
+      "F76"
+    ],
+    "factions": [
+      "Vault-Tec"
+    ],
+    "keywords": [
+      "vault",
+      "vault76",
+      "nuclear",
+      "construction"
+    ],
+    "images": [
+      "/images/f2/cover.webp"
+    ],
+    "related_ids": [],
+    "canon": "canon",
+    "period": "pre-war"
+  },
+  {
+    "id": "f3",
+    "date": "2076-01-01",
+    "precision": "year",
+    "display_date": "2076 (approx.)",
+    "title": "REPCONN Operation",
+    "details": "REPCONN Aerospace is bought out by RobCo.",
+    "game": [
+      "FNV"
+    ],
+    "factions": [
+      "RobCo"
+    ],
+    "keywords": [
+      "house",
+      "industry",
+      "repconn"
+    ],
+    "images": [
+      "/images/f3/cover.webp"
+    ],
+    "related_ids": [],
+    "canon": "canon",
+    "period": "pre-war"
+  },
+  {
+    "id": "f4",
+    "date": "2076-06-01",
+    "precision": "month",
+    "display_date": "June 2076",
+    "title": "T-51 is Ready!",
+    "details": "T-51 Power Armor is complete and sent to the Chinese Front.",
+    "game": [
+      "F1",
+      "F2",
+      "F3",
+      "FNV",
+      "F4",
+      "F76",
+      "TV"
+    ],
+    "factions": [
+      "West-Tek",
+      "US Govt"
+    ],
+    "keywords": [
+      "powerarmor",
+      "military",
+      "war",
+      "great"
+    ],
+    "images": [
+      "/images/f4/cover.webp"
+    ],
+    "related_ids": [],
+    "canon": "canon",
+    "period": "pre-war"
+  },
+  {
+    "id": "f5",
+    "date": "2076-10-20",
+    "precision": "day",
+    "display_date": "2076-10-20",
+    "title": "Nuka Cola Quantum!",
+    "details": "Nuka Cola Quantum Created",
+    "game": [
+      "F1",
+      "F2",
+      "F3",
+      "FNV",
+      "F4",
+      "F76",
+      "TV"
+    ],
+    "factions": [
+      "Industries"
+    ],
+    "keywords": [
+      "nukacola",
+      "beverage",
+      "drink",
+      "radiation"
+    ],
+    "images": [
+      "/images/f5/cover.webp"
+    ],
+    "related_ids": [],
+    "canon": "canon",
+    "period": "pre-war"
+  },
+  {
+    "id": "f6",
+    "date": "2077-01-10",
+    "precision": "day",
+    "display_date": "2077-01-10",
+    "title": "Battle of Anchorage Ends",
+    "details": "Battle of Anchorage is over and Chinese Army removed from Alaska.",
+    "game": [
+      "PRW"
+    ],
+    "factions": [
+      "UN",
+      "China",
+      "US Govt"
+    ],
+    "keywords": [
+      "alaska",
+      "war",
+      "anchorage",
+      "china"
+    ],
+    "images": [
+      "/images/f6/cover.webp"
+    ],
+    "related_ids": [],
+    "canon": "canon",
+    "period": "pre-war"
+  },
+  {
+    "id": "f7",
+    "date": "2077-10-23",
+    "precision": "day",
+    "display_date": "2077-10-23",
+    "title": "The Great War",
+    "details": "Two-hour nuclear exchange devastates the world.",
+    "game": [
+      "F1",
+      "F2",
+      "F3",
+      "FNV",
+      "F4",
+      "F76",
+      "TV"
+    ],
+    "factions": [
+      "Vault-Tec"
+    ],
+    "keywords": [
+      "nuclear",
+      "war",
+      "great"
+    ],
+    "images": [
+      "/images/f7/cover.webp",
+      "/images/f7/map.webp"
+    ],
+    "related_ids": [],
+    "canon": "canon",
+    "period": "pre-war"
+  },
+  {
+    "id": "f8",
+    "date": "2077-11-01",
+    "precision": "month",
+    "display_date": "November 2077",
+    "title": "Brotherhood of Steel",
+    "details": "Captain Maxon, his men and their families reaches Lost Hills Bunker. They created the Brotherhood of Steel faction.",
+    "game": [
+      "PRW"
+    ],
+    "factions": [
+      "BoS"
+    ],
+    "keywords": [
+      "maxon",
+      "losthills",
+      "metallicmonks"
+    ],
+    "images": [
+      "/images/f8/cover.webp"
+    ],
+    "related_ids": [],
+    "canon": "canon",
+    "period": "post-war"
+  },
+  {
+    "id": "f9",
+    "date": "2080-01-01",
+    "precision": "decade",
+    "display_date": "2080s",
+    "title": "Radiation Mutations",
+    "details": "Radiation causes the first widespread mutations among survivors, animals, and plants. New species are created almost overnight",
+    "game": [
+      "PRW"
+    ],
+    "factions": [
+      "Radiation"
+    ],
+    "keywords": [
+      "mutation",
+      "mutants",
+      "nature",
+      "radiation"
+    ],
+    "images": [
+      "/images/f9/cover.webp"
+    ],
+    "related_ids": [],
+    "canon": "canon",
+    "period": "post-war"
+  },
+  {
+    "id": "f10",
+    "date": "2161-12-05",
+    "precision": "day",
+    "display_date": "2161-12-05",
+    "title": "Vault 13 Water Chip",
+    "details": "Due to the Vault 13 Water Chip issue, a lonely vault dweller leaves the vault to the wasteland and starts to search for a water chip.",
+    "game": [
+      "F1"
+    ],
+    "factions": [
+      "Vault-Tec"
+    ],
+    "keywords": [
+      "waterchip",
+      "vault",
+      "vault13",
+      "vaultdweller"
+    ],
+    "images": [
+      "/images/f10/cover.webp"
+    ],
+    "related_ids": [],
+    "canon": "canon",
+    "period": "post-war"
+  }
+]
