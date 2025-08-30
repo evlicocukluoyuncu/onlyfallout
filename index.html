@@ -10,16 +10,18 @@
   <style>
     :root{
       --bg: #0b0f19;          /* page background */
-      --panel: #0f172a;       /* cards & drawer */
+      --panel: #0f172a;       /* cards & popup */
       --text: #e5e7eb;        /* primary text */
       --muted: #94a3b8;       /* muted text */
       --accent: #22d3ee;      /* ui accents */
       --pre: #f59e0b;         /* pre‑war lane color (amber) */
       --post:#10b981;         /* post‑war lane color (emerald) */
+      --blue: #93c5fd;        /* pastel blue for thumb frame */
       --ring: rgba(34,211,238,.28);
       --lane-w: 10px;         /* width of the left lane */
-      --gutter-l: 140px;      /* left gutter to make space for lane + ticks + legend */
-      --thumb: 80px;          /* thumbnail size (≤100px) */
+      --legend-w: 120px;      /* legend width */
+      --gutter-l: 120px;      /* base gutter */
+      --thumb: 84px;          /* thumbnail size (≤100px) */
       --radius: 16px;
       --shadow: 0 20px 40px rgba(2,6,23,.45), 0 0 0 1px rgba(148,163,184,.10) inset;
     }
@@ -47,42 +49,52 @@
     .count{color:var(--muted);font-size:13px;text-align:right}
 
     /* Layout */
-    .wrap{max-width:1200px;margin:0 auto;display:grid;grid-template-columns: 1fr min(52vw,560px);gap:18px}
-    .left{position:relative;}
+    .wrap{max-width:1200px;margin:0 auto;display:grid;grid-template-columns: var(--legend-w) 1fr;gap:8px}
 
     /* Legend */
-    .legend{position:sticky;top:62px;left:0;width:120px;color:var(--muted);font-size:12px;padding:8px 8px 0 16px}
+    .legend{position:sticky;top:62px;left:0;width:var(--legend-w);color:var(--muted);font-size:12px;padding:8px 8px 0 16px}
     .legend .row{display:flex;align-items:center;gap:8px;margin:4px 0}
     .legend .swatch{width:12px;height:12px;border-radius:3px}
 
     /* Timeline canvas */
-    .stage{position:relative;margin-left:var(--gutter-l);}
-    .lane{position:absolute;left:calc(var(--gutter-l) - var(--lane-w) - 24px);width:var(--lane-w);border-radius:999px;overflow:hidden}
+    .stage-wrap{position:relative;padding-right:8px}
+    .stage{position:relative; margin-left: calc(var(--gutter-l) - 40px);}
+    /* move timeline a bit more to the left than before */
+
+    .lane{position:absolute;left:calc(var(--gutter-l) - var(--lane-w) - 56px);width:var(--lane-w);border-radius:999px;overflow:hidden}
     .seg{width:100%}
 
-    .tick{position:absolute;left:calc(var(--gutter-l) - 24px);right:12px;height:1px;background:rgba(148,163,184,.12)}
+    .tick{position:absolute;left:calc(var(--gutter-l) - 56px);right:12px;height:1px;background:rgba(148,163,184,.12)}
     .tick .label{position:absolute;left:calc(-100% - 16px);top:-8px;color:var(--muted);font-size:11px;white-space:nowrap}
 
     .event{position:absolute;display:flex;align-items:center;gap:12px;transform:translateY(-50%)}
-    .thumb{width:var(--thumb);height:var(--thumb);border-radius:999px;object-fit:cover;border:2px solid #0b0f19;box-shadow:0 6px 18px rgba(0,0,0,.45)}
-    .thumb.fallback{display:grid;place-items:center;background:#111a2d;color:#7dd3fc;font-weight:700;font-size:22px}
-    .edate{font-size:12px;color:var(--muted)}
 
-    /* Drawer */
-    .drawer{position:sticky;top:62px;align-self:start;background:var(--panel);border:1px solid rgba(148,163,184,.12);border-radius:var(--radius);box-shadow:var(--shadow);padding:16px;min-height:220px}
-    .drawer .empty{color:var(--muted);text-align:center;padding:40px 10px}
-    .gallery{display:flex;gap:8px;flex-wrap:wrap}
-    .gallery img{width:100%;max-height:300px;object-fit:cover;border-radius:12px;border:1px solid rgba(148,163,184,.12)}
-    .tags{display:flex;flex-wrap:wrap;gap:8px}
+    /* Blue-ish thumbnail frame */
+    .thumb-wrap{width:calc(var(--thumb) + 10px);height:calc(var(--thumb) + 10px);padding:5px;border-radius:999px;background:rgba(147,197,253,.15);box-shadow:0 8px 24px rgba(30,58,138,.35);border:1px solid rgba(147,197,253,.35)}
+    .thumb{width:var(--thumb);height:var(--thumb);border-radius:999px;object-fit:cover;border:2px solid rgba(147,197,253,.6);display:block}
+    .thumb.fallback{display:grid;place-items:center;background:#111a2d;color:#7dd3fc;font-weight:700;font-size:22px}
+
+    .meta .edate{font-size:12px;color:var(--muted)}
+
+    /* Anchored Popup Card */
+    .card{position:absolute;left:0;top:0;transform:translateY(-50%);background:var(--panel);border:1px solid rgba(148,163,184,.12);border-radius:16px;box-shadow:var(--shadow);padding:12px;min-width:min(52vw,520px);max-width:min(60vw,640px);z-index:5}
+    .card .title{margin:6px 0 0;font-size:18px;font-weight:700}
+    .card .date{color:var(--muted);font-size:12px;margin-bottom:6px}
+    .card .gallery{display:flex;gap:8px;flex-wrap:wrap}
+    .card .gallery img{width:100%;max-height:300px;object-fit:cover;border-radius:12px;border:1px solid rgba(148,163,184,.12)}
+    .card .tags{display:flex;flex-wrap:wrap;gap:8px;margin-top:8px}
     .tag{display:inline-block;padding:6px 10px;border:1px solid rgba(148,163,184,.2);border-radius:999px;color:var(--text);background:#0e1628;font-size:12px}
-    .related a{display:inline-block;margin-right:8px;margin-bottom:8px}
+    .close{position:absolute;top:8px;right:8px;background:#0e1628;border:1px solid rgba(148,163,184,.2);border-radius:8px;color:var(--text);padding:4px 8px}
+
+    /* Zoom UI */
+    .zoom-ui{position:fixed;right:14px;bottom:14px;display:flex;flex-direction:column;gap:8px;z-index:60}
+    .zoom-ui button{background:#0e1628;border:1px solid rgba(148,163,184,.25);color:var(--text);padding:10px 12px;border-radius:10px;box-shadow:var(--shadow)}
 
     /* Responsive */
     @media (max-width: 980px){
       .wrap{grid-template-columns: 1fr}
-      .drawer{position:static}
-      .stage{margin-right:10px}
       .legend{position:static;display:flex;gap:12px;width:auto;padding:8px 16px}
+      .card{min-width:92vw;max-width:92vw}
     }
   </style>
 </head>
@@ -119,18 +131,21 @@
       <div style="margin-bottom:6px;color:#e2e8f0;font-weight:600">Legend</div>
       <div class="row"><span class="swatch" style="background:var(--pre)"></span> Pre‑War (≤ 2077‑10‑23)</div>
       <div class="row"><span class="swatch" style="background:var(--post)"></span> Post‑War (> 2077‑10‑23)</div>
+      <div style="margin-top:10px;color:var(--muted)">Tip: Use <strong>+</strong>/<strong>−</strong>/<strong>0</strong> to zoom in/out/reset.</div>
     </aside>
 
-    <section class="left">
+    <section class="stage-wrap">
       <!-- Timeline lane and ticks are injected here -->
       <div id="lane" class="lane" aria-hidden="true"></div>
       <div id="stage" class="stage"></div>
     </section>
-
-    <aside class="drawer" id="drawer" aria-live="polite">
-      <div class="empty">Select an event to see details.</div>
-    </aside>
   </main>
+
+  <div class="zoom-ui" aria-label="Zoom controls">
+    <button id="zoomIn" title="Zoom in (+)">＋</button>
+    <button id="zoomOut" title="Zoom out (−)">－</button>
+    <button id="zoomReset" title="Reset (0)">⟳</button>
+  </div>
 
   <footer style="max-width:1200px;margin:24px auto 40px;color:var(--muted);font-size:12px;padding:0 16px">
     © <span id="year"></span> onlyfallout.com — Fan‑made, unofficial. Fallout IP belongs to its owners.
@@ -141,25 +156,32 @@
     const START = new Date('1900-01-01');
     const END   = new Date('3000-01-01');
     const CUTOFF = new Date('2077-10-23'); // Great War
-    const PX_PER_YEAR = 6; // default density — "not too tight, not too comfy"
+    const DEFAULT_PX_PER_YEAR = 6; // not too tight, not too comfy
+    const MIN_PX_PER_YEAR = 2;
+    const MAX_PX_PER_YEAR = 18;
+    const ZOOM_STEP = 1; // change per key/button press
 
-    // Whitelist order for game chips (for nicer UI ordering)
+    // Preferred order for game chips
     const GAME_ORDER = ['PRW','F1','F2','F3','FNV','F4','F76','TV','Non-canon'];
 
     // ====== State ======
     let EVENTS = [];
     let FILTER = { q: '', games: new Set(), factions: new Set() };
     let ACTIVE_ID = null;
+    let PX_PER_YEAR = DEFAULT_PX_PER_YEAR;
 
     // ====== Elements ======
     const stage  = document.getElementById('stage');
     const laneEl = document.getElementById('lane');
-    const drawer = document.getElementById('drawer');
     const qInput = document.getElementById('q');
     const clearBtn = document.getElementById('clearBtn');
     const countEl = document.getElementById('count');
     const gamesGroup = document.getElementById('gamesGroup');
     const factionsGroup = document.getElementById('factionsGroup');
+
+    const zoomInBtn = document.getElementById('zoomIn');
+    const zoomOutBtn = document.getElementById('zoomOut');
+    const zoomResetBtn = document.getElementById('zoomReset');
 
     document.getElementById('year').textContent = new Date().getFullYear();
 
@@ -167,14 +189,13 @@
     const yearsBetween = (a,b) => (b - a) / (1000*60*60*24*365.2425);
     const yForDate = (d) => Math.max(0, yearsBetween(START, d)) * PX_PER_YEAR;
     const clamp = (n, min, max) => Math.max(min, Math.min(max, n));
+    const asArray = v => Array.isArray(v) ? v : String(v||'').split(',').map(s=>s.trim()).filter(Boolean);
 
     function fmtDisplayDate(ev){
       if (ev.display_date) return ev.display_date;
       const d = new Date(ev.date);
       return d.toISOString().slice(0,10);
     }
-
-    const asArray = v => Array.isArray(v) ? v : String(v||'').split(',').map(s=>s.trim()).filter(Boolean);
 
     function getThumb(ev){
       const imgs = asArray(ev.images);
@@ -206,19 +227,16 @@
     }
 
     function passFilters(ev){
-      // Text search across title, details, keywords, factions, game
       const q = FILTER.q.trim().toLowerCase();
       if (q){
         const hay = [ev.title, ev.details, ...asArray(ev.keywords), ...asArray(ev.factions), ...asArray(ev.game)].join(' ').toLowerCase();
         if (!hay.includes(q)) return false;
       }
-      // Games
       if (FILTER.games.size){
         const gset = new Set(asArray(ev.game).map(s => s.toLowerCase()));
         let hit = false; FILTER.games.forEach(g => { if (gset.has(g)) hit = true; });
         if (!hit) return false;
       }
-      // Factions
       if (FILTER.factions.size){
         const fset = new Set(asArray(ev.factions).map(s => s.toLowerCase()));
         let hit = false; FILTER.factions.forEach(f => { if (fset.has(f)) hit = true; });
@@ -239,16 +257,20 @@
       const shown = EVENTS.filter(passFilters);
       countEl.textContent = `${shown.length} event${shown.length===1?'':'s'}`;
 
+      // Render events and attach any open card
       shown.forEach((ev, i) => {
         const y = yForDate(new Date(ev.date));
         const el = document.createElement('button');
         el.className = 'event';
         el.style.top = y + 'px';
-        const xShift = (i % 2) * 16; // simple stagger
-        el.style.left = `calc(-10px + ${xShift}px)`;
+        const xShift = (i % 2) * 12; // slight stagger
+        el.style.left = `calc(-28px + ${xShift}px)`; // keep spine a bit more to the left
         el.setAttribute('aria-label', ev.title || ev.id);
-        el.addEventListener('click', () => openDrawer(ev.id, true));
+        el.addEventListener('click', () => openCard(ev.id, true));
 
+        // thumbnail (blue-ish frame)
+        const wrap = document.createElement('div');
+        wrap.className = 'thumb-wrap';
         const src = getThumb(ev);
         let thumb;
         if (src){
@@ -262,26 +284,47 @@
           thumb.className = 'thumb fallback';
           thumb.textContent = '？';
         }
+        wrap.appendChild(thumb);
+
         const meta = document.createElement('div');
+        meta.className = 'meta';
         meta.innerHTML = `<div class="edate">${fmtDisplayDate(ev)}</div><div>${ev.title||''}</div>`;
-        el.appendChild(thumb);
+
+        el.appendChild(wrap);
         el.appendChild(meta);
         stage.appendChild(el);
+
+        if (ACTIVE_ID === ev.id){
+          attachCard(ev, y, el);
+        }
       });
 
-      if (location.hash){
+      // Try to open hash after render
+      if (location.hash && !ACTIVE_ID){
         const id = decodeURIComponent(location.hash.slice(1));
-        if (EVENTS.find(e => e.id === id)) openDrawer(id, false);
+        if (EVENTS.find(e => e.id === id)) openCard(id, false);
       }
     }
 
-    function openDrawer(id, updateHash){
-      const ev = EVENTS.find(e => e.id === id);
-      if (!ev){ drawer.innerHTML = '<div class="empty">Event not found.</div>'; return; }
-      if (updateHash){ history.replaceState(null, '', `#${encodeURIComponent(id)}`); }
+    function attachCard(ev, y, anchorEl){
+      // Remove existing
+      const old = document.getElementById('openCard');
+      if (old) old.remove();
 
-      const parts = [];
+      const card = document.createElement('div');
+      card.className = 'card';
+      card.id = 'openCard';
+
+      // Position: to the RIGHT of the thumbnail box
+      const anchorLeft = anchorEl.offsetLeft;
+      const thumbWidth = parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--thumb')) + 10; // wrap width
+      const left = anchorLeft + thumbWidth + 16; // 16px gap to the right of thumb
+
+      card.style.top = y + 'px';
+      card.style.left = left + 'px';
+
       const imgs = asArray(ev.images);
+      const parts = [];
       if (imgs.length){
         const first = imgs[0];
         const rest = imgs.slice(1);
@@ -291,31 +334,53 @@
           `</div>`);
       }
 
-      parts.push(`<h2 style="margin:10px 0 0">${ev.title||ev.id}</h2>`);
-      parts.push(`<div style="color:var(--muted);font-size:13px;margin-bottom:8px">${fmtDisplayDate(ev)} • ${ev.period==='pre-war'?'Pre‑War':'Post‑War'}${ev.canon==='non-canon'?' • Non‑canon':''}</div>`);
+      parts.push(`<button class="close" onclick="closeCard()" aria-label="Close">✕</button>`);
+      parts.push(`<div class="title">${ev.title||ev.id}</div>`);
+      parts.push(`<div class="date">${fmtDisplayDate(ev)} • ${ev.period==='pre-war'?'Pre‑War':'Post‑War'}${ev.canon==='non-canon'?' • Non‑canon':''}</div>`);
 
-      if (ev.details){ parts.push(`<p style="margin:8px 0 16px">${escapeHTML(ev.details)}</p>`); }
+      if (ev.details){ parts.push(`<div style="margin:6px 0 10px">${escapeHTML(ev.details)}</div>`); }
 
       const chips = [];
       asArray(ev.keywords).forEach(k => chips.push(`<span class="tag">#${escapeHTML(k)}</span>`));
       asArray(ev.factions).forEach(f => chips.push(`<span class="tag">${escapeHTML(f)}</span>`));
-      // pretty order for games
       const orderedGames = asArray(ev.game).slice().sort((a,b)=>GAME_ORDER.indexOf(a) - GAME_ORDER.indexOf(b));
       orderedGames.forEach(g => chips.push(`<span class="tag">${escapeHTML(g)}</span>`));
-      if (chips.length){ parts.push(`<div class="tags" style="margin-bottom:10px">${chips.join('')}</div>`); }
+      if (chips.length){ parts.push(`<div class="tags">${chips.join('')}</div>`); }
 
+      // Related
       if (ev.related_ids && asArray(ev.related_ids).length){
         const rel = asArray(ev.related_ids).filter(rid => EVENTS.find(e => e.id === rid));
         if (rel.length){
-          parts.push('<div class="related"><div style="color:var(--muted);font-size:12px;margin-bottom:6px">Related events</div>' +
+          parts.push('<div style="margin-top:8px"><div style="color:var(--muted);font-size:12px;margin-bottom:6px">Related events</div>' +
             rel.map(rid => `<a class="tag" href="#${encodeURIComponent(rid)}" onclick="event.preventDefault(); openById('${encodeURIComponent(rid)}');">${escapeHTML(rid)}</a>`).join('') +
             '</div>');
         }
       }
 
-      parts.push(`<div style="margin-top:12px"><button class="btn" onclick="copyLink('${encodeURIComponent(ev.id)}')">Copy link</button></div>`);
+      parts.push(`<div style="margin-top:10px"><button class="btn" onclick="copyLink('${encodeURIComponent(ev.id)}')">Copy link</button></div>`);
 
-      drawer.innerHTML = parts.join('');
+      card.innerHTML = parts.join('');
+      stage.appendChild(card);
+    }
+
+    function openCard(id, updateHash){
+      const ev = EVENTS.find(e => e.id === id);
+      if (!ev) return;
+      ACTIVE_ID = id;
+      if (updateHash){ history.replaceState(null, '', `#${encodeURIComponent(id)}`); }
+      const y = yForDate(new Date(ev.date));
+
+      // find anchor element to compute left
+      const anchors = [...stage.querySelectorAll('.event')];
+      const anchorEl = anchors.find(btn => (btn.querySelector('.meta')?.textContent||'').includes(ev.title || '')) || anchors[0];
+      attachCard(ev, y, anchorEl);
+    }
+
+    function closeCard(){
+      ACTIVE_ID = null;
+      const old = document.getElementById('openCard');
+      if (old) old.remove();
+      history.replaceState(null, '', location.pathname + location.search);
     }
 
     function openById(id){
@@ -324,15 +389,13 @@
       if (ev){
         const y = yForDate(new Date(ev.date));
         window.scrollTo({ top: Math.max(0, y - 140), behavior: 'smooth' });
-        openDrawer(rid, true);
+        openCard(rid, true);
       }
     }
 
     function copyLink(id){
       const url = `${location.origin}${location.pathname}#${id}`;
-      navigator.clipboard.writeText(url).then(()=>{
-        alert('Link copied to clipboard');
-      });
+      navigator.clipboard.writeText(url).then(()=>{ alert('Link copied to clipboard'); });
     }
 
     function escapeHTML(s){
@@ -383,7 +446,7 @@
       });
     }
 
-    // ====== Filter wiring ======
+    // ====== Search/clear wiring ======
     qInput.addEventListener('input', () => { FILTER.q = qInput.value; render(); });
     clearBtn.addEventListener('click', () => {
       FILTER = { q: '', games: new Set(), factions: new Set() };
@@ -391,6 +454,33 @@
       gamesGroup.querySelectorAll('input[type="checkbox"]').forEach(cb => cb.checked = false);
       factionsGroup.querySelectorAll('input[type="checkbox"]').forEach(cb => cb.checked = false);
       render();
+    });
+
+    // ====== Zoom controls ======
+    function setZoom(val){
+      PX_PER_YEAR = clamp(val, MIN_PX_PER_YEAR, MAX_PX_PER_YEAR);
+      render();
+    }
+    zoomInBtn.addEventListener('click', () => setZoom(PX_PER_YEAR + ZOOM_STEP));
+    zoomOutBtn.addEventListener('click', () => setZoom(PX_PER_YEAR - ZOOM_STEP));
+    zoomResetBtn.addEventListener('click', () => setZoom(DEFAULT_PX_PER_YEAR));
+
+    // Keyboard shortcuts (+, -, 0), ignore when typing in inputs or with Ctrl/Cmd
+    window.addEventListener('keydown', (e) => {
+      const tag = (e.target && e.target.tagName) ? e.target.tagName.toLowerCase() : '';
+      if (tag === 'input' || tag === 'textarea' || e.ctrlKey || e.metaKey || e.altKey) return;
+      if (e.key === '+' || e.key === '='){ e.preventDefault(); setZoom(PX_PER_YEAR + ZOOM_STEP); }
+      else if (e.key === '-' || e.key === '_'){ e.preventDefault(); setZoom(PX_PER_YEAR - ZOOM_STEP); }
+      else if (e.key === '0'){ e.preventDefault(); setZoom(DEFAULT_PX_PER_YEAR); }
+      else if (e.key === 'Escape'){ closeCard(); }
+    });
+
+    // Click outside to close card
+    document.addEventListener('click', (e) => {
+      const card = document.getElementById('openCard');
+      if (!card) return;
+      const within = card.contains(e.target) || (e.target.closest && e.target.closest('.event'));
+      if (!within) closeCard();
     });
 
     // ====== Boot ======
@@ -408,16 +498,20 @@
         EVENTS.sort((a,b) => a.date.localeCompare(b.date));
         renderFilterCheckboxes();
         render();
+        if (location.hash){
+          const id = decodeURIComponent(location.hash.slice(1));
+          if (EVENTS.find(e => e.id === id)) openCard(id, false);
+        }
       })
       .catch(err => {
         console.error('Failed to load events.json', err);
         stage.innerHTML = '<div style="padding:20px;color:var(--muted)">Could not load events. Make sure <code>events.json</code> is in your repo root.</div>';
       });
 
-    // Open by hash on back/forward
+    // Hash navigation
     window.addEventListener('hashchange', () => {
       const id = decodeURIComponent(location.hash.slice(1));
-      if (id) openDrawer(id, false);
+      if (id) openCard(id, false);
     });
   </script>
 </body>
