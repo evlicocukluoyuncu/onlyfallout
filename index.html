@@ -3,73 +3,422 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>onlyfallout.com — Please Stand By</title>
-  <meta name="description" content="onlyfallout.com — Fallout timelines are loading. Please stand by." />
-
-<link rel="icon" href="/favicon.ico">
-
-<meta name="theme-color" content="#0b0f19">
-  
+  <title>onlyfallout.com — Fallout Vertical Timeline</title>
+  <meta name="description" content="A vertical, searchable Fallout timeline (1900–3000) with images, factions, and game filters." />
+  <link rel="icon" href="/favicon.ico">
+  <meta name="theme-color" content="#0b0f19" />
   <style>
     :root{
-      --bg: #0b0f19;
-      --text: #e5e7eb;
-      --muted: #94a3b8;
-      --accent: #22d3ee;
+      --bg: #0b0f19;          /* page background */
+      --panel: #0f172a;       /* cards & drawer */
+      --text: #e5e7eb;        /* primary text */
+      --muted: #94a3b8;       /* muted text */
+      --accent: #22d3ee;      /* ui accents */
+      --pre: #f59e0b;         /* pre‑war lane color (amber) */
+      --post:#10b981;         /* post‑war lane color (emerald) */
+      --ring: rgba(34,211,238,.28);
+      --lane-w: 10px;         /* width of the left lane */
+      --gutter-l: 140px;      /* left gutter to make space for lane + ticks + legend */
+      --thumb: 80px;          /* thumbnail size (≤100px) */
+      --radius: 16px;
+      --shadow: 0 20px 40px rgba(2,6,23,.45), 0 0 0 1px rgba(148,163,184,.10) inset;
     }
-    html,body{height:100%;margin:0}
-    body{
-      background:var(--bg);
-      color:var(--text);
-      font: 16px/1.5 system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, "Apple Color Emoji","Segoe UI Emoji";
-      display:grid; place-items:center;
-    }
-    .wrap{
-      text-align:center;
-      padding:40px 20px;
-      max-width:760px;
-    }
-    .logo{
-      width:min(260px, 60vw);
-      height:auto;
-      border-radius:12px;
-      display:block;
-      margin:0 auto 18px;
-    }
-    h1{
-      font-size:clamp(28px, 4vw, 48px);
-      line-height:1.1;
-      margin:0 0 10px;
-      letter-spacing:.3px;
-    }
-    .sub{
-      color:var(--muted);
-      font-size:clamp(14px, 2vw, 18px);
-      margin:0 0 24px;
-    }
-    .chip{
-      display:inline-block;
-      padding:8px 12px;
-      border:1px solid rgba(255,255,255,.12);
-      border-radius:999px;
-      color:var(--text);
-      text-decoration:none;
-    }
-    footer{
-      position:fixed; left:0; right:0; bottom:10px;
-      text-align:center; color:var(--muted); font-size:12px;
+    *{box-sizing:border-box}
+    html,body{height:100%}
+    body{margin:0;background:var(--bg);color:var(--text);font:16px/1.55 ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, "Apple Color Emoji","Segoe UI Emoji"}
+    a{color:var(--accent);text-decoration:none}
+    a:hover{text-decoration:underline}
+
+    /* Toolbar */
+    .toolbar{position:sticky;top:0;z-index:50;background:rgba(11,15,25,.85);backdrop-filter: blur(8px);border-bottom:1px solid rgba(148,163,184,.12)}
+    .bar{max-width:1200px;margin:0 auto;padding:10px 16px;display:grid;grid-template-columns: auto 1fr auto;gap:12px;align-items:center}
+    .brand{display:flex;align-items:center;gap:10px;font-weight:700}
+    .brand .mark{width:28px;height:28px;border-radius:8px;background:linear-gradient(135deg,var(--accent),#38bdf8);display:grid;place-items:center;box-shadow:var(--shadow)}
+
+    .filters{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
+    .group{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+    .group .label{color:var(--muted);font-size:12px}
+    .checkbox{display:inline-flex;align-items:center;gap:6px;border:1px solid rgba(148,163,184,.2);padding:6px 10px;border-radius:999px;background:#0e1628;color:var(--text);font-size:13px}
+    .checkbox input{accent-color:var(--accent)}
+
+    .search{display:flex;align-items:center;gap:8px;border:1px solid rgba(148,163,184,.2);padding:8px 10px;border-radius:12px;background:#0e1628;color:var(--text);min-width:220px}
+    .search input{all:unset;width:220px}
+    .btn{display:inline-flex;align-items:center;gap:8px;padding:8px 12px;border-radius:10px;border:1px solid rgba(148,163,184,.2);background:#0e1628;color:var(--text)}
+    .count{color:var(--muted);font-size:13px;text-align:right}
+
+    /* Layout */
+    .wrap{max-width:1200px;margin:0 auto;display:grid;grid-template-columns: 1fr min(52vw,560px);gap:18px}
+    .left{position:relative;}
+
+    /* Legend */
+    .legend{position:sticky;top:62px;left:0;width:120px;color:var(--muted);font-size:12px;padding:8px 8px 0 16px}
+    .legend .row{display:flex;align-items:center;gap:8px;margin:4px 0}
+    .legend .swatch{width:12px;height:12px;border-radius:3px}
+
+    /* Timeline canvas */
+    .stage{position:relative;margin-left:var(--gutter-l);}
+    .lane{position:absolute;left:calc(var(--gutter-l) - var(--lane-w) - 24px);width:var(--lane-w);border-radius:999px;overflow:hidden}
+    .seg{width:100%}
+
+    .tick{position:absolute;left:calc(var(--gutter-l) - 24px);right:12px;height:1px;background:rgba(148,163,184,.12)}
+    .tick .label{position:absolute;left:calc(-100% - 16px);top:-8px;color:var(--muted);font-size:11px;white-space:nowrap}
+
+    .event{position:absolute;display:flex;align-items:center;gap:12px;transform:translateY(-50%)}
+    .thumb{width:var(--thumb);height:var(--thumb);border-radius:999px;object-fit:cover;border:2px solid #0b0f19;box-shadow:0 6px 18px rgba(0,0,0,.45)}
+    .thumb.fallback{display:grid;place-items:center;background:#111a2d;color:#7dd3fc;font-weight:700;font-size:22px}
+    .edate{font-size:12px;color:var(--muted)}
+
+    /* Drawer */
+    .drawer{position:sticky;top:62px;align-self:start;background:var(--panel);border:1px solid rgba(148,163,184,.12);border-radius:var(--radius);box-shadow:var(--shadow);padding:16px;min-height:220px}
+    .drawer .empty{color:var(--muted);text-align:center;padding:40px 10px}
+    .gallery{display:flex;gap:8px;flex-wrap:wrap}
+    .gallery img{width:100%;max-height:300px;object-fit:cover;border-radius:12px;border:1px solid rgba(148,163,184,.12)}
+    .tags{display:flex;flex-wrap:wrap;gap:8px}
+    .tag{display:inline-block;padding:6px 10px;border:1px solid rgba(148,163,184,.2);border-radius:999px;color:var(--text);background:#0e1628;font-size:12px}
+    .related a{display:inline-block;margin-right:8px;margin-bottom:8px}
+
+    /* Responsive */
+    @media (max-width: 980px){
+      .wrap{grid-template-columns: 1fr}
+      .drawer{position:static}
+      .stage{margin-right:10px}
+      .legend{position:static;display:flex;gap:12px;width:auto;padding:8px 16px}
     }
   </style>
 </head>
 <body>
-  <main class="wrap" role="main" aria-label="Under construction">
-    <img class="logo" src="/images/please-stand-by.gif" alt="Vault Boy — Please stand by" />
-    <h1>PLEASE STAND BY!</h1>
-    <p class="sub">Our Pip-Boy is calibrating and the wasteland is <em>under reconstruction</em>.<br/> 
-    The Fallout mega-timeline will unlock soon.</p>
-   
+  <header class="toolbar">
+    <div class="bar">
+      <div class="brand"><div class="mark">⚡</div><div>onlyfallout<span style="color:var(--accent)">.com</span></div></div>
+
+      <div class="filters" id="filters">
+        <!-- Games -->
+        <div class="group" id="gamesGroup">
+          <span class="label">Games:</span>
+          <!-- checkboxes injected here -->
+        </div>
+        <!-- Factions -->
+        <div class="group" id="factionsGroup">
+          <span class="label">Factions:</span>
+          <!-- checkboxes injected here -->
+        </div>
+        <!-- Search -->
+        <label class="search" title="Search title, details, factions, keywords, games">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><path d="M21 21l-4.3-4.3" stroke="#94a3b8" stroke-width="2" stroke-linecap="round"/><circle cx="11" cy="11" r="7" stroke="#94a3b8" stroke-width="2"/></svg>
+          <input id="q" placeholder="Search the wasteland…" />
+        </label>
+        <button class="btn" id="clearBtn">Clear</button>
+      </div>
+
+      <div class="count" id="count">0 events</div>
+    </div>
+  </header>
+
+  <main class="wrap">
+    <aside class="legend" aria-label="Legend">
+      <div style="margin-bottom:6px;color:#e2e8f0;font-weight:600">Legend</div>
+      <div class="row"><span class="swatch" style="background:var(--pre)"></span> Pre‑War (≤ 2077‑10‑23)</div>
+      <div class="row"><span class="swatch" style="background:var(--post)"></span> Post‑War (> 2077‑10‑23)</div>
+    </aside>
+
+    <section class="left">
+      <!-- Timeline lane and ticks are injected here -->
+      <div id="lane" class="lane" aria-hidden="true"></div>
+      <div id="stage" class="stage"></div>
+    </section>
+
+    <aside class="drawer" id="drawer" aria-live="polite">
+      <div class="empty">Select an event to see details.</div>
+    </aside>
   </main>
-  <footer>© <span id="y"></span> onlyfallout.com — Fan-made, unofficial. Fallout lore © their respective owners.</footer>
-  <script>document.getElementById('y').textContent=new Date().getFullYear()</script>
+
+  <footer style="max-width:1200px;margin:24px auto 40px;color:var(--muted);font-size:12px;padding:0 16px">
+    © <span id="year"></span> onlyfallout.com — Fan‑made, unofficial. Fallout IP belongs to its owners.
+  </footer>
+
+  <script>
+    // ====== Config ======
+    const START = new Date('1900-01-01');
+    const END   = new Date('3000-01-01');
+    const CUTOFF = new Date('2077-10-23'); // Great War
+    const PX_PER_YEAR = 6; // default density — "not too tight, not too comfy"
+
+    // Whitelist order for game chips (for nicer UI ordering)
+    const GAME_ORDER = ['PRW','F1','F2','F3','FNV','F4','F76','TV','Non-canon'];
+
+    // ====== State ======
+    let EVENTS = [];
+    let FILTER = { q: '', games: new Set(), factions: new Set() };
+    let ACTIVE_ID = null;
+
+    // ====== Elements ======
+    const stage  = document.getElementById('stage');
+    const laneEl = document.getElementById('lane');
+    const drawer = document.getElementById('drawer');
+    const qInput = document.getElementById('q');
+    const clearBtn = document.getElementById('clearBtn');
+    const countEl = document.getElementById('count');
+    const gamesGroup = document.getElementById('gamesGroup');
+    const factionsGroup = document.getElementById('factionsGroup');
+
+    document.getElementById('year').textContent = new Date().getFullYear();
+
+    // ====== Utils ======
+    const yearsBetween = (a,b) => (b - a) / (1000*60*60*24*365.2425);
+    const yForDate = (d) => Math.max(0, yearsBetween(START, d)) * PX_PER_YEAR;
+    const clamp = (n, min, max) => Math.max(min, Math.min(max, n));
+
+    function fmtDisplayDate(ev){
+      if (ev.display_date) return ev.display_date;
+      const d = new Date(ev.date);
+      return d.toISOString().slice(0,10);
+    }
+
+    const asArray = v => Array.isArray(v) ? v : String(v||'').split(',').map(s=>s.trim()).filter(Boolean);
+
+    function getThumb(ev){
+      const imgs = asArray(ev.images);
+      if (imgs.length){ return imgs[0]; }
+      return null;
+    }
+
+    function buildLane(totalH){
+      laneEl.style.height = totalH + 'px';
+      const preH = clamp(yForDate(CUTOFF), 0, totalH);
+      laneEl.innerHTML = `<div class="seg" style="height:${preH}px;background:var(--pre)"></div>` +
+                         `<div class="seg" style="height:${Math.max(0,totalH-preH)}px;background:var(--post)"></div>`;
+    }
+
+    function buildTicks(totalH){
+      const startY = START.getUTCFullYear();
+      const endY = END.getUTCFullYear();
+      for(let y = Math.ceil(startY/10)*10; y <= endY; y += 10){
+        const yPos = yForDate(new Date(`${y}-01-01T00:00:00Z`));
+        const tick = document.createElement('div');
+        tick.className = 'tick';
+        tick.style.top = yPos + 'px';
+        const label = document.createElement('div');
+        label.className = 'label';
+        label.textContent = y;
+        tick.appendChild(label);
+        stage.appendChild(tick);
+      }
+    }
+
+    function passFilters(ev){
+      // Text search across title, details, keywords, factions, game
+      const q = FILTER.q.trim().toLowerCase();
+      if (q){
+        const hay = [ev.title, ev.details, ...asArray(ev.keywords), ...asArray(ev.factions), ...asArray(ev.game)].join(' ').toLowerCase();
+        if (!hay.includes(q)) return false;
+      }
+      // Games
+      if (FILTER.games.size){
+        const gset = new Set(asArray(ev.game).map(s => s.toLowerCase()));
+        let hit = false; FILTER.games.forEach(g => { if (gset.has(g)) hit = true; });
+        if (!hit) return false;
+      }
+      // Factions
+      if (FILTER.factions.size){
+        const fset = new Set(asArray(ev.factions).map(s => s.toLowerCase()));
+        let hit = false; FILTER.factions.forEach(f => { if (fset.has(f)) hit = true; });
+        if (!hit) return false;
+      }
+      return true;
+    }
+
+    function clearStage(){ stage.innerHTML = ''; }
+
+    function render(){
+      clearStage();
+      const totalH = Math.max(600, yForDate(END));
+      stage.style.height = totalH + 'px';
+      buildLane(totalH);
+      buildTicks(totalH);
+
+      const shown = EVENTS.filter(passFilters);
+      countEl.textContent = `${shown.length} event${shown.length===1?'':'s'}`;
+
+      shown.forEach((ev, i) => {
+        const y = yForDate(new Date(ev.date));
+        const el = document.createElement('button');
+        el.className = 'event';
+        el.style.top = y + 'px';
+        const xShift = (i % 2) * 16; // simple stagger
+        el.style.left = `calc(-10px + ${xShift}px)`;
+        el.setAttribute('aria-label', ev.title || ev.id);
+        el.addEventListener('click', () => openDrawer(ev.id, true));
+
+        const src = getThumb(ev);
+        let thumb;
+        if (src){
+          thumb = document.createElement('img');
+          thumb.className = 'thumb';
+          thumb.loading = 'lazy';
+          thumb.alt = ev.title || ev.id;
+          thumb.src = src;
+        } else {
+          thumb = document.createElement('div');
+          thumb.className = 'thumb fallback';
+          thumb.textContent = '？';
+        }
+        const meta = document.createElement('div');
+        meta.innerHTML = `<div class="edate">${fmtDisplayDate(ev)}</div><div>${ev.title||''}</div>`;
+        el.appendChild(thumb);
+        el.appendChild(meta);
+        stage.appendChild(el);
+      });
+
+      if (location.hash){
+        const id = decodeURIComponent(location.hash.slice(1));
+        if (EVENTS.find(e => e.id === id)) openDrawer(id, false);
+      }
+    }
+
+    function openDrawer(id, updateHash){
+      const ev = EVENTS.find(e => e.id === id);
+      if (!ev){ drawer.innerHTML = '<div class="empty">Event not found.</div>'; return; }
+      if (updateHash){ history.replaceState(null, '', `#${encodeURIComponent(id)}`); }
+
+      const parts = [];
+      const imgs = asArray(ev.images);
+      if (imgs.length){
+        const first = imgs[0];
+        const rest = imgs.slice(1);
+        parts.push(`<div class="gallery">` +
+          `<img src="${first}" alt="${ev.title||ev.id}" loading="lazy" />` +
+          rest.map(src => `<img src="${src}" alt="${ev.title||ev.id}" loading="lazy" />`).join('') +
+          `</div>`);
+      }
+
+      parts.push(`<h2 style="margin:10px 0 0">${ev.title||ev.id}</h2>`);
+      parts.push(`<div style="color:var(--muted);font-size:13px;margin-bottom:8px">${fmtDisplayDate(ev)} • ${ev.period==='pre-war'?'Pre‑War':'Post‑War'}${ev.canon==='non-canon'?' • Non‑canon':''}</div>`);
+
+      if (ev.details){ parts.push(`<p style="margin:8px 0 16px">${escapeHTML(ev.details)}</p>`); }
+
+      const chips = [];
+      asArray(ev.keywords).forEach(k => chips.push(`<span class="tag">#${escapeHTML(k)}</span>`));
+      asArray(ev.factions).forEach(f => chips.push(`<span class="tag">${escapeHTML(f)}</span>`));
+      // pretty order for games
+      const orderedGames = asArray(ev.game).slice().sort((a,b)=>GAME_ORDER.indexOf(a) - GAME_ORDER.indexOf(b));
+      orderedGames.forEach(g => chips.push(`<span class="tag">${escapeHTML(g)}</span>`));
+      if (chips.length){ parts.push(`<div class="tags" style="margin-bottom:10px">${chips.join('')}</div>`); }
+
+      if (ev.related_ids && asArray(ev.related_ids).length){
+        const rel = asArray(ev.related_ids).filter(rid => EVENTS.find(e => e.id === rid));
+        if (rel.length){
+          parts.push('<div class="related"><div style="color:var(--muted);font-size:12px;margin-bottom:6px">Related events</div>' +
+            rel.map(rid => `<a class="tag" href="#${encodeURIComponent(rid)}" onclick="event.preventDefault(); openById('${encodeURIComponent(rid)}');">${escapeHTML(rid)}</a>`).join('') +
+            '</div>');
+        }
+      }
+
+      parts.push(`<div style="margin-top:12px"><button class="btn" onclick="copyLink('${encodeURIComponent(ev.id)}')">Copy link</button></div>`);
+
+      drawer.innerHTML = parts.join('');
+    }
+
+    function openById(id){
+      const rid = decodeURIComponent(id);
+      const ev = EVENTS.find(e => e.id === rid);
+      if (ev){
+        const y = yForDate(new Date(ev.date));
+        window.scrollTo({ top: Math.max(0, y - 140), behavior: 'smooth' });
+        openDrawer(rid, true);
+      }
+    }
+
+    function copyLink(id){
+      const url = `${location.origin}${location.pathname}#${id}`;
+      navigator.clipboard.writeText(url).then(()=>{
+        alert('Link copied to clipboard');
+      });
+    }
+
+    function escapeHTML(s){
+      return (s||'').replace(/[&<>"']/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;','\'':'&#39;'}[m]));
+    }
+
+    // ====== Filters UI (checkboxes) ======
+    function uniqueValues(collector){
+      const set = new Set();
+      EVENTS.forEach(ev => collector(ev).forEach(v => set.add(v)));
+      return Array.from(set);
+    }
+
+    function renderFilterCheckboxes(){
+      // Games
+      const allGames = uniqueValues(ev => asArray(ev.game)).sort((a,b)=>{
+        const ia = GAME_ORDER.indexOf(a), ib = GAME_ORDER.indexOf(b);
+        return (ia===-1?999:ia) - (ib===-1?999:ib);
+      });
+      gamesGroup.querySelectorAll('label.checkbox').forEach(n=>n.remove());
+      allGames.forEach(g => {
+        const id = `g_${g.replace(/[^a-z0-9]/gi,'_')}`;
+        const lbl = document.createElement('label');
+        lbl.className = 'checkbox';
+        lbl.innerHTML = `<input type="checkbox" id="${id}"> <span>${g}</span>`;
+        const cb = lbl.querySelector('input');
+        cb.addEventListener('change', () => {
+          if (cb.checked) FILTER.games.add(g.toLowerCase()); else FILTER.games.delete(g.toLowerCase());
+          render();
+        });
+        gamesGroup.appendChild(lbl);
+      });
+
+      // Factions
+      const allFactions = uniqueValues(ev => asArray(ev.factions)).sort((a,b)=>a.localeCompare(b));
+      factionsGroup.querySelectorAll('label.checkbox').forEach(n=>n.remove());
+      allFactions.forEach(f => {
+        const id = `f_${f.replace(/[^a-z0-9]/gi,'_')}`;
+        const lbl = document.createElement('label');
+        lbl.className = 'checkbox';
+        lbl.innerHTML = `<input type="checkbox" id="${id}"> <span>${f}</span>`;
+        const cb = lbl.querySelector('input');
+        cb.addEventListener('change', () => {
+          if (cb.checked) FILTER.factions.add(f.toLowerCase()); else FILTER.factions.delete(f.toLowerCase());
+          render();
+        });
+        factionsGroup.appendChild(lbl);
+      });
+    }
+
+    // ====== Filter wiring ======
+    qInput.addEventListener('input', () => { FILTER.q = qInput.value; render(); });
+    clearBtn.addEventListener('click', () => {
+      FILTER = { q: '', games: new Set(), factions: new Set() };
+      qInput.value='';
+      gamesGroup.querySelectorAll('input[type="checkbox"]').forEach(cb => cb.checked = false);
+      factionsGroup.querySelectorAll('input[type="checkbox"]').forEach(cb => cb.checked = false);
+      render();
+    });
+
+    // ====== Boot ======
+    fetch('/events.json', { cache: 'no-cache' })
+      .then(r => r.json())
+      .then(data => {
+        EVENTS = (data||[]).map(ev => ({
+          ...ev,
+          game: asArray(ev.game),
+          factions: asArray(ev.factions),
+          keywords: asArray(ev.keywords),
+          images: asArray(ev.images),
+          related_ids: asArray(ev.related_ids),
+        }));
+        EVENTS.sort((a,b) => a.date.localeCompare(b.date));
+        renderFilterCheckboxes();
+        render();
+      })
+      .catch(err => {
+        console.error('Failed to load events.json', err);
+        stage.innerHTML = '<div style="padding:20px;color:var(--muted)">Could not load events. Make sure <code>events.json</code> is in your repo root.</div>';
+      });
+
+    // Open by hash on back/forward
+    window.addEventListener('hashchange', () => {
+      const id = decodeURIComponent(location.hash.slice(1));
+      if (id) openDrawer(id, false);
+    });
+  </script>
 </body>
 </html>
