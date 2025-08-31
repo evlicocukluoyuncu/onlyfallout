@@ -11,12 +11,12 @@
     :root{
       --bg: #eae1d0;          /* page background */
       --panel: #0f172a;       /* cards & popup */
-      --text: #1e293b;        /* darker text */
+      --text: #1e293b;        /* dark text for light bg */
       --muted: #475569;       /* muted text */
-      --accent: #22d3ee;      /* ui accents */
-      --pre: #f59e0b;         /* pre-war lane */
-      --post:#10b981;         /* post-war lane */
-      --blue: #93c5fd;        /* pastel blue for thumbs */
+      --accent: #22d3ee;      /* UI accents */
+      --pre: #f59e0b;         /* Pre-War lane color */
+      --post:#10b981;         /* Post-War lane color */
+      --blue: #93c5fd;        /* pastel blue frame */
       --lane-w: 10px;
       --legend-w: 120px;
       --gutter-l: 120px;
@@ -33,7 +33,7 @@
     /* Toolbar */
     .toolbar{position:sticky;top:0;z-index:50;background:rgba(234,225,208,.95);backdrop-filter: blur(8px);border-bottom:1px solid rgba(148,163,184,.25)}
     .bar{max-width:1200px;margin:0 auto;padding:10px 16px;display:grid;grid-template-columns: auto 1fr auto;gap:12px;align-items:center}
-    .brand{display:flex;align-items:center;gap:10px;font-weight:700}
+    .brand{display:flex;align-items:center;gap:10px}
     .brand-logo{height:40px;width:auto;display:block}
 
     .filters{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
@@ -41,7 +41,6 @@
     .group .label{color:var(--muted);font-size:12px}
     .checkbox{display:inline-flex;align-items:center;gap:6px;border:1px solid rgba(148,163,184,.2);padding:6px 10px;border-radius:999px;background:#f1f5f9;color:var(--text);font-size:13px}
     .checkbox input{accent-color:var(--accent)}
-
     .search{display:flex;align-items:center;gap:8px;border:1px solid rgba(148,163,184,.2);padding:8px 10px;border-radius:12px;background:#f1f5f9;color:var(--text);min-width:220px}
     .search input{all:unset;width:220px}
     .btn{display:inline-flex;align-items:center;gap:8px;padding:8px 12px;border-radius:10px;border:1px solid rgba(148,163,184,.2);background:#f1f5f9;color:var(--text)}
@@ -53,6 +52,7 @@
     .legend .swatch{width:12px;height:12px;border-radius:3px}
 
     /* Timeline */
+    .wrap{max-width:1200px;margin:0 auto;display:grid;grid-template-columns: var(--legend-w) 1fr;gap:8px}
     .stage-wrap{position:relative;padding-right:8px}
     .stage{position:relative;margin-left: calc(var(--gutter-l) - 40px);}
     .lane{position:absolute;left:calc(var(--gutter-l) - var(--lane-w) - 56px);width:var(--lane-w);border-radius:999px;overflow:hidden}
@@ -66,7 +66,7 @@
     .thumb.fallback{display:grid;place-items:center;background:#e2e8f0;color:#1e3a8a;font-weight:700;font-size:22px}
     .meta .edate{font-size:12px;color:var(--muted)}
 
-    /* Popup Card */
+    /* Anchored Popup Card */
     .card{position:absolute;left:0;top:0;transform:translateY(-50%);background:var(--panel);color:#f8fafc;border:1px solid rgba(148,163,184,.12);border-radius:16px;box-shadow:var(--shadow);padding:12px;min-width:min(52vw,520px);max-width:min(60vw,640px);z-index:5}
     .card .title{margin:6px 0 0;font-size:18px;font-weight:700}
     .card .date{color:#cbd5e1;font-size:12px;margin-bottom:6px}
@@ -80,21 +80,28 @@
     .zoom-ui{position:fixed;right:14px;bottom:14px;display:flex;flex-direction:column;gap:8px;z-index:60}
     .zoom-ui button{background:#f1f5f9;border:1px solid rgba(148,163,184,.25);color:var(--text);padding:10px 12px;border-radius:10px;box-shadow:var(--shadow)}
 
+    /* Responsive */
+    @media (max-width: 980px){
+      .wrap{grid-template-columns: 1fr}
+      .legend{position:static;display:flex;gap:12px;width:auto;padding:8px 16px}
+      .card{min-width:92vw;max-width:92vw}
+    }
+
     footer{max-width:1200px;margin:24px auto 40px;color:var(--muted);font-size:12px;padding:0 16px}
   </style>
 </head>
 <body>
   <header class="toolbar">
     <div class="bar">
-      <!-- Brand with logo -->
       <a class="brand" href="/" aria-label="onlyfallout.com home">
         <img class="brand-logo" src="/images/vaultboy-logo.png" alt="onlyfallout.com"/>
       </a>
-
       <div class="filters" id="filters">
         <div class="group" id="gamesGroup"><span class="label">Games:</span></div>
         <div class="group" id="factionsGroup"><span class="label">Factions:</span></div>
-        <label class="search"><input id="q" placeholder="Search the wasteland…"/></label>
+        <label class="search" title="Search title, details, keywords, factions, games">
+          <input id="q" placeholder="Search the wasteland…"/>
+        </label>
         <button class="btn" id="clearBtn">Clear</button>
       </div>
       <div class="count" id="count">0 events</div>
@@ -106,24 +113,336 @@
       <div style="margin-bottom:6px;color:#1e293b;font-weight:600">Legend</div>
       <div class="row"><span class="swatch" style="background:var(--pre)"></span> Pre-War (≤ 2077-10-23)</div>
       <div class="row"><span class="swatch" style="background:var(--post)"></span> Post-War (> 2077-10-23)</div>
+      <div style="margin-top:10px;color:var(--muted)">Tip: Use <b>+</b>/<b>−</b>/<b>0</b> to zoom in/out/reset.</div>
     </aside>
+
     <section class="stage-wrap">
       <div id="lane" class="lane"></div>
       <div id="stage" class="stage"></div>
     </section>
   </main>
 
-  <div class="zoom-ui">
-    <button id="zoomIn">＋</button>
-    <button id="zoomOut">－</button>
-    <button id="zoomReset">⟳</button>
+  <div class="zoom-ui" aria-label="Zoom controls">
+    <button id="zoomIn" title="Zoom in (+)">＋</button>
+    <button id="zoomOut" title="Zoom out (−)">－</button>
+    <button id="zoomReset" title="Reset (0)">⟳</button>
   </div>
 
   <footer>© <span id="year"></span> onlyfallout.com — Fan-made, unofficial. Fallout IP belongs to its owners.</footer>
 
   <script>
     document.getElementById('year').textContent = new Date().getFullYear();
-    /* ... your JS rendering/zoom/filter logic here (unchanged from previous working version) ... */
+
+    // ===== Config =====
+    const START  = new Date('1900-01-01');
+    const END    = new Date('3000-01-01');
+    const CUTOFF = new Date('2077-10-23');
+
+    const DEFAULT_PX_PER_YEAR = 6;
+    const MIN_PX_PER_YEAR = 2;
+    const MAX_PX_PER_YEAR = 2400;   // day-level zoom
+    const ZOOM_FACTOR = 1.25;       // multiplicative zoom
+
+    const GAME_ORDER = ['PRW','F1','F2','F3','FNV','F4','F76','TV','Non-canon'];
+
+    // ===== State =====
+    let EVENTS = [];
+    let FILTER = { q: '', games: new Set(), factions: new Set() };
+    let ACTIVE_ID = null;
+    let PX_PER_YEAR = DEFAULT_PX_PER_YEAR;
+
+    // ===== Elements =====
+    const stage  = document.getElementById('stage');
+    const laneEl = document.getElementById('lane');
+    const qInput = document.getElementById('q');
+    const clearBtn = document.getElementById('clearBtn');
+    const countEl = document.getElementById('count');
+    const gamesGroup = document.getElementById('gamesGroup');
+    const factionsGroup = document.getElementById('factionsGroup');
+    const zoomInBtn = document.getElementById('zoomIn');
+    const zoomOutBtn = document.getElementById('zoomOut');
+    const zoomResetBtn = document.getElementById('zoomReset');
+
+    // ===== Utils =====
+    const yearsBetween = (a,b) => (b - a) / (1000*60*60*24*365.2425);
+    const yForDate = (d) => Math.max(0, yearsBetween(START, d)) * PX_PER_YEAR;
+    const clamp = (n, min, max) => Math.max(min, Math.min(max, n));
+    const asArray = v => Array.isArray(v) ? v : String(v||'').split(',').map(s=>s.trim()).filter(Boolean);
+    function fmtDisplayDate(ev){ return ev.display_date || new Date(ev.date).toISOString().slice(0,10); }
+    function getThumb(ev){ const imgs = asArray(ev.images); return imgs.length ? imgs[0] : null; }
+
+    // ===== Build pieces =====
+    function buildLane(totalH){
+      laneEl.style.height = totalH + 'px';
+      const preH = clamp(yForDate(CUTOFF), 0, totalH);
+      laneEl.innerHTML =
+        '<div class="seg" style="height:'+preH+'px;background:var(--pre)"></div>' +
+        '<div class="seg" style="height:'+Math.max(0,totalH-preH)+'px;background:var(--post)"></div>';
+    }
+    function buildTicks(totalH){
+      const startY = START.getUTCFullYear();
+      const endY = END.getUTCFullYear();
+      const useYears = PX_PER_YEAR >= 300; // switch to yearly when very zoomed
+      for(let y = Math.ceil(startY/10)*10; y <= endY; y += (useYears?1:10)){
+        const yPos = yForDate(new Date(y+'-01-01T00:00:00Z'));
+        const tick = document.createElement('div');
+        tick.className = 'tick';
+        tick.style.top = yPos + 'px';
+        const label = document.createElement('div');
+        label.className = 'label';
+        label.textContent = y;
+        tick.appendChild(label);
+        stage.appendChild(tick);
+      }
+    }
+
+    function passFilters(ev){
+      const q = FILTER.q.trim().toLowerCase();
+      if (q){
+        const hay = [ev.title, ev.details, ...asArray(ev.keywords), ...asArray(ev.factions), ...asArray(ev.game)]
+          .join(' ').toLowerCase();
+        if (!hay.includes(q)) return false;
+      }
+      if (FILTER.games.size){
+        const gset = new Set(asArray(ev.game).map(s => s.toLowerCase()));
+        let ok = false; FILTER.games.forEach(g => { if (gset.has(g)) ok = true; });
+        if (!ok) return false;
+      }
+      if (FILTER.factions.size){
+        const fset = new Set(asArray(ev.factions).map(s => s.toLowerCase()));
+        let ok = false; FILTER.factions.forEach(f => { if (fset.has(f)) ok = true; });
+        if (!ok) return false;
+      }
+      return true;
+    }
+
+    function render(){
+      stage.innerHTML = '';
+      const totalH = Math.max(1200, yForDate(END));
+      stage.style.height = totalH + 'px';
+      buildLane(totalH);
+      buildTicks(totalH);
+
+      const shown = EVENTS.filter(passFilters);
+      countEl.textContent = shown.length + ' event' + (shown.length===1?'':'s');
+
+      // anti-collision: fan out close events into columns
+      const THRESH = parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--thumb')) + 14;
+      let lastY = -Infinity, col = 0;
+
+      shown.forEach(ev => {
+        const y = yForDate(new Date(ev.date));
+        if (Math.abs(y - lastY) < THRESH) col = (col + 1) % 4; else col = 0;
+        lastY = y;
+
+        const el = document.createElement('button');
+        el.className = 'event';
+        el.style.top = y + 'px';
+        const COLUMN_OFFSET = (parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--thumb')) + 40);
+        el.style.left = 'calc(-28px + ' + (col * COLUMN_OFFSET) + 'px)';
+        el.setAttribute('aria-label', ev.title || ev.id);
+        el.addEventListener('click', () => openCard(ev.id, true));
+
+        const wrap = document.createElement('div');
+        wrap.className = 'thumb-wrap';
+        const src = getThumb(ev);
+        let thumb;
+        if (src){
+          thumb = document.createElement('img'); thumb.className = 'thumb';
+          thumb.loading = 'lazy'; thumb.alt = ev.title || ev.id; thumb.src = src;
+        } else {
+          thumb = document.createElement('div'); thumb.className = 'thumb fallback'; thumb.textContent = '？';
+        }
+        wrap.appendChild(thumb);
+
+        const meta = document.createElement('div');
+        meta.className = 'meta';
+        meta.innerHTML = '<div class="edate">'+fmtDisplayDate(ev)+'</div><div>'+ (ev.title||'') +'</div>';
+
+        el.appendChild(wrap); el.appendChild(meta);
+        stage.appendChild(el);
+
+        if (ACTIVE_ID === ev.id){ attachCard(ev, y, el); }
+      });
+    }
+
+    function attachCard(ev, y, anchorEl){
+      const old = document.getElementById('openCard'); if (old) old.remove();
+      const card = document.createElement('div'); card.className = 'card'; card.id = 'openCard';
+      const anchorLeft = anchorEl.offsetLeft;
+      const thumbWrap = parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--thumb')) + 10;
+      const left = anchorLeft + thumbWrap + 16;
+      card.style.top = y + 'px'; card.style.left = left + 'px';
+
+      const imgs = asArray(ev.images);
+      const parts = [];
+
+      if (imgs.length){
+        parts.push('<div class="gallery">' + imgs.map(src => '<img src="'+src+'" alt="'+(ev.title||ev.id)+'" loading="lazy">').join('') + '</div>');
+      }
+      parts.push('<button class="close" onclick="closeCard()" aria-label="Close">✕</button>');
+      parts.push('<div class="title">'+(ev.title||ev.id)+'</div>');
+      const canon = (ev.canon==='non-canon') ? ' • Non-canon' : '';
+      parts.push('<div class="date">'+fmtDisplayDate(ev)+' • '+(ev.period==='pre-war'?'Pre-War':'Post-War')+canon+'</div>');
+
+      if (ev.details) parts.push('<div style="margin:6px 0 10px">'+escapeHTML(ev.details)+'</div>');
+
+      const chips = [];
+      asArray(ev.keywords).forEach(k => chips.push('<span class="tag">#'+escapeHTML(k)+'</span>'));
+      asArray(ev.factions).forEach(f => chips.push('<span class="tag">'+escapeHTML(f)+'</span>'));
+      const orderedGames = asArray(ev.game).slice().sort((a,b)=>GAME_ORDER.indexOf(a)-GAME_ORDER.indexOf(b));
+      orderedGames.forEach(g => chips.push('<span class="tag">'+escapeHTML(g)+'</span>'));
+      if (chips.length) parts.push('<div class="tags">'+chips.join('')+'</div>');
+
+      const rel = asArray(ev.related_ids).filter(rid => EVENTS.find(e => e.id === rid));
+      if (rel.length){
+        parts.push('<div style="margin-top:8px"><div style="color:#cbd5e1;font-size:12px;margin-bottom:6px">Related events</div>'+
+          rel.map(rid => '<a class="tag" href="#'+encodeURIComponent(rid)+'" onclick="event.preventDefault(); openById(\''+encodeURIComponent(rid)+'\');">'+escapeHTML(rid)+'</a>').join('')+
+          '</div>');
+      }
+
+      parts.push('<div style="margin-top:10px"><button class="btn" onclick="copyLink(\''+encodeURIComponent(ev.id)+'\')">Copy link</button></div>');
+
+      card.innerHTML = parts.join('');
+      stage.appendChild(card);
+    }
+
+    function openCard(id, updateHash){
+      const ev = EVENTS.find(e => e.id === id); if (!ev) return;
+      ACTIVE_ID = id;
+      if (updateHash){ history.replaceState(null, '', '#'+encodeURIComponent(id)); }
+      const y = yForDate(new Date(ev.date));
+      const anchorEl = [...stage.querySelectorAll('.event')].find(btn => (btn.querySelector('.meta')?.textContent||'').includes(ev.title||'')) || null;
+      attachCard(ev, y, anchorEl || {offsetLeft:-28});
+    }
+    function closeCard(){
+      ACTIVE_ID = null;
+      const old = document.getElementById('openCard'); if (old) old.remove();
+      history.replaceState(null, '', location.pathname + location.search);
+    }
+    function openById(id){
+      const rid = decodeURIComponent(id);
+      const ev = EVENTS.find(e => e.id === rid); if (!ev) return;
+      const y = yForDate(new Date(ev.date));
+      window.scrollTo({ top: Math.max(0, y - 140), behavior: 'smooth' });
+      openCard(rid, true);
+    }
+    function copyLink(id){
+      const url = location.origin + location.pathname + '#'+id;
+      navigator.clipboard.writeText(url).then(()=>alert('Link copied to clipboard'));
+    }
+    function escapeHTML(s){ return (s||'').replace(/[&<>\"']/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m])); }
+
+    // ===== Filters UI =====
+    function uniqueValues(collector){
+      const set = new Set(); EVENTS.forEach(ev => collector(ev).forEach(v => set.add(v)));
+      return Array.from(set);
+    }
+    function renderFilterCheckboxes(){
+      // Games
+      const allGames = uniqueValues(ev => asArray(ev.game)).sort((a,b)=>{
+        const ia = GAME_ORDER.indexOf(a), ib = GAME_ORDER.indexOf(b);
+        return (ia===-1?999:ia) - (ib===-1?999:ib);
+      });
+      gamesGroup.querySelectorAll('label.checkbox').forEach(n=>n.remove());
+      allGames.forEach(g=>{
+        const id='g_'+g.replace(/[^a-z0-9]/gi,'_');
+        const lbl=document.createElement('label'); lbl.className='checkbox';
+        lbl.innerHTML='<input type="checkbox" id="'+id+'"> <span>'+g+'</span>';
+        const cb=lbl.querySelector('input');
+        cb.addEventListener('change',()=>{ if(cb.checked) FILTER.games.add(g.toLowerCase()); else FILTER.games.delete(g.toLowerCase()); render(); });
+        gamesGroup.appendChild(lbl);
+      });
+      // Factions
+      const allFactions = uniqueValues(ev => asArray(ev.factions)).sort((a,b)=>a.localeCompare(b));
+      factionsGroup.querySelectorAll('label.checkbox').forEach(n=>n.remove());
+      allFactions.forEach(f=>{
+        const id='f_'+f.replace(/[^a-z0-9]/gi,'_');
+        const lbl=document.createElement('label'); lbl.className='checkbox';
+        lbl.innerHTML='<input type="checkbox" id="'+id+'"> <span>'+f+'</span>';
+        const cb=lbl.querySelector('input');
+        cb.addEventListener('change',()=>{ if(cb.checked) FILTER.factions.add(f.toLowerCase()); else FILTER.factions.delete(f.toLowerCase()); render(); });
+        factionsGroup.appendChild(lbl);
+      });
+    }
+
+    // ===== Search/Clear =====
+    qInput.addEventListener('input', ()=>{ FILTER.q = qInput.value; render(); });
+    clearBtn.addEventListener('click', ()=>{
+      FILTER={ q:'', games:new Set(), factions:new Set() };
+      qInput.value='';
+      gamesGroup.querySelectorAll('input[type="checkbox"]').forEach(cb=>cb.checked=false);
+      factionsGroup.querySelectorAll('input[type="checkbox"]').forEach(cb=>cb.checked=false);
+      render();
+    });
+
+    // ===== Zoom with viewport anchoring =====
+    function setZoom(val){
+      const prev = PX_PER_YEAR;
+      const next = clamp(val, MIN_PX_PER_YEAR, MAX_PX_PER_YEAR);
+      if (next === prev) return;
+
+      const anchorViewportY = window.innerHeight / 2;
+      const stageRect = stage.getBoundingClientRect();
+      const stageTopDoc = stageRect.top + window.scrollY;
+      const yInStage = Math.max(0, window.scrollY + anchorViewportY - stageTopDoc);
+      const yearsFromStart = yInStage / prev;
+
+      PX_PER_YEAR = next;
+      render();
+
+      const newYInStage = yearsFromStart * PX_PER_YEAR;
+      const newScrollTop = stageTopDoc + newYInStage - anchorViewportY;
+      window.scrollTo({ top: Math.max(0, newScrollTop) });
+    }
+    zoomInBtn.addEventListener('click', ()=>setZoom(PX_PER_YEAR * ZOOM_FACTOR));
+    zoomOutBtn.addEventListener('click', ()=>setZoom(PX_PER_YEAR / ZOOM_FACTOR));
+    zoomResetBtn.addEventListener('click', ()=>setZoom(DEFAULT_PX_PER_YEAR));
+    window.addEventListener('keydown', (e)=>{
+      const tag = (e.target && e.target.tagName) ? e.target.tagName.toLowerCase() : '';
+      if (tag==='input' || tag==='textarea' || e.ctrlKey || e.metaKey || e.altKey) return;
+      if (e.key==='+' || e.key==='='){ e.preventDefault(); setZoom(PX_PER_YEAR * ZOOM_FACTOR); }
+      else if (e.key==='-' || e.key==='_'){ e.preventDefault(); setZoom(PX_PER_YEAR / ZOOM_FACTOR); }
+      else if (e.key==='0'){ e.preventDefault(); setZoom(DEFAULT_PX_PER_YEAR); }
+      else if (e.key==='Escape'){ closeCard(); }
+    });
+    document.addEventListener('click', (e)=>{
+      const card=document.getElementById('openCard'); if(!card) return;
+      const within = card.contains(e.target) || (e.target.closest && e.target.closest('.event'));
+      if (!within) closeCard();
+    });
+
+    // ===== Boot =====
+    fetch('/events.json', { cache: 'no-cache' })
+      .then(r => r.json())
+      .then(data => {
+        EVENTS = (data||[]).map(ev => ({
+          ...ev,
+          game: asArray(ev.game),
+          factions: asArray(ev.factions),
+          keywords: asArray(ev.keywords),
+          images: asArray(ev.images),
+          related_ids: asArray(ev.related_ids),
+        }));
+        EVENTS.sort((a,b)=>a.date.localeCompare(b.date));
+        renderFilterCheckboxes();
+        render();
+        if (location.hash){
+          const id=decodeURIComponent(location.hash.slice(1));
+          if (EVENTS.find(e=>e.id===id)) openCard(id,false);
+        }
+      })
+      .catch(err=>{
+        console.error('Failed to load events.json', err);
+        stage.innerHTML = '<div style="padding:20px;color:#475569">Could not load events. Ensure <code>events.json</code> exists in the repo root.</div>';
+      });
+
+    window.addEventListener('hashchange', ()=>{
+      const id=decodeURIComponent(location.hash.slice(1));
+      if (id) openCard(id,false);
+    });
   </script>
+
+  <script>document.getElementById('year').textContent=new Date().getFullYear()</script>
 </body>
 </html>
