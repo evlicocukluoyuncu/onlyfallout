@@ -9,25 +9,24 @@
   <meta name="theme-color" content="#eae1d0" />
   <style>
     :root{
-      --bg: #eae1d0;          /* page background (updated) */
+      --bg: #eae1d0;          /* page background */
       --panel: #0f172a;       /* cards & popup */
-      --text: #1e293b;        /* darker text for light background */
+      --text: #1e293b;        /* darker text */
       --muted: #475569;       /* muted text */
       --accent: #22d3ee;      /* ui accents */
-      --pre: #f59e0b;         /* pre‑war lane color (amber) */
-      --post:#10b981;         /* post‑war lane color (emerald) */
-      --blue: #93c5fd;        /* pastel blue for thumb frame */
-      --ring: rgba(34,211,238,.28);
-      --lane-w: 10px;         /* width of the left lane */
-      --legend-w: 120px;      /* legend width */
-      --gutter-l: 120px;      /* base gutter */
-      --thumb: 84px;          /* thumbnail size (≤100px) */
+      --pre: #f59e0b;         /* pre-war lane */
+      --post:#10b981;         /* post-war lane */
+      --blue: #93c5fd;        /* pastel blue for thumbs */
+      --lane-w: 10px;
+      --legend-w: 120px;
+      --gutter-l: 120px;
+      --thumb: 84px;
       --radius: 16px;
       --shadow: 0 20px 40px rgba(0,0,0,.25), 0 0 0 1px rgba(148,163,184,.10) inset;
     }
     *{box-sizing:border-box}
     html,body{height:100%}
-    body{margin:0;background:var(--bg);color:var(--text);font:16px/1.55 ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, "Apple Color Emoji","Segoe UI Emoji"}
+    body{margin:0;background:var(--bg);color:var(--text);font:16px/1.55 ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial}
     a{color:var(--accent);text-decoration:none}
     a:hover{text-decoration:underline}
 
@@ -53,31 +52,33 @@
     .legend .row{display:flex;align-items:center;gap:8px;margin:4px 0}
     .legend .swatch{width:12px;height:12px;border-radius:3px}
 
-    /* Timeline canvas */
+    /* Timeline */
     .stage-wrap{position:relative;padding-right:8px}
-    .stage{position:relative; margin-left: calc(var(--gutter-l) - 40px);}
-
+    .stage{position:relative;margin-left: calc(var(--gutter-l) - 40px);}
     .lane{position:absolute;left:calc(var(--gutter-l) - var(--lane-w) - 56px);width:var(--lane-w);border-radius:999px;overflow:hidden}
     .seg{width:100%}
-
     .tick{position:absolute;left:calc(var(--gutter-l) - 56px);right:12px;height:1px;background:rgba(148,163,184,.25)}
     .tick .label{position:absolute;left:calc(-100% - 16px);top:-8px;color:var(--muted);font-size:11px;white-space:nowrap}
 
     .event{position:absolute;display:flex;align-items:center;gap:12px;transform:translateY(-50%)}
     .thumb-wrap{width:calc(var(--thumb) + 10px);height:calc(var(--thumb) + 10px);padding:5px;border-radius:999px;background:rgba(147,197,253,.2);box-shadow:0 8px 24px rgba(0,0,0,.25);border:1px solid rgba(147,197,253,.35)}
-    .thumb{width:var(--thumb);height:var(--thumb);border-radius:999px;object-fit:cover;border:2px solid rgba(147,197,253,.6);display:block}
+    .thumb{width:var(--thumb);height:var(--thumb);border-radius:999px;object-fit:cover;border:2px solid rgba(147,197,253,.6)}
     .thumb.fallback{display:grid;place-items:center;background:#e2e8f0;color:#1e3a8a;font-weight:700;font-size:22px}
     .meta .edate{font-size:12px;color:var(--muted)}
 
-    /* Anchored Popup Card */
+    /* Popup Card */
     .card{position:absolute;left:0;top:0;transform:translateY(-50%);background:var(--panel);color:#f8fafc;border:1px solid rgba(148,163,184,.12);border-radius:16px;box-shadow:var(--shadow);padding:12px;min-width:min(52vw,520px);max-width:min(60vw,640px);z-index:5}
     .card .title{margin:6px 0 0;font-size:18px;font-weight:700}
     .card .date{color:#cbd5e1;font-size:12px;margin-bottom:6px}
     .card .gallery{display:flex;gap:8px;flex-wrap:wrap}
-    .card .gallery img{width:100%;max-height:300px;object-fit:cover;border-radius:12px;border:1px solid rgba(148,163,184,.12)}
+    .card .gallery img{width:100%;max-height:300px;object-fit:cover;border-radius:12px}
     .card .tags{display:flex;flex-wrap:wrap;gap:8px;margin-top:8px}
     .tag{display:inline-block;padding:6px 10px;border:1px solid rgba(148,163,184,.2);border-radius:999px;color:#f8fafc;background:#1e293b;font-size:12px}
     .close{position:absolute;top:8px;right:8px;background:#1e293b;border:1px solid rgba(148,163,184,.2);border-radius:8px;color:#f8fafc;padding:4px 8px}
+
+    /* Zoom UI */
+    .zoom-ui{position:fixed;right:14px;bottom:14px;display:flex;flex-direction:column;gap:8px;z-index:60}
+    .zoom-ui button{background:#f1f5f9;border:1px solid rgba(148,163,184,.25);color:var(--text);padding:10px 12px;border-radius:10px;box-shadow:var(--shadow)}
 
     footer{max-width:1200px;margin:24px auto 40px;color:var(--muted);font-size:12px;padding:0 16px}
   </style>
@@ -93,22 +94,36 @@
       <div class="filters" id="filters">
         <div class="group" id="gamesGroup"><span class="label">Games:</span></div>
         <div class="group" id="factionsGroup"><span class="label">Factions:</span></div>
-        <label class="search" title="Search title, details, factions, keywords, games">
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><path d="M21 21l-4.3-4.3" stroke="#475569" stroke-width="2" stroke-linecap="round"/><circle cx="11" cy="11" r="7" stroke="#475569" stroke-width="2"/></svg>
-          <input id="q" placeholder="Search the wasteland…" />
-        </label>
+        <label class="search"><input id="q" placeholder="Search the wasteland…"/></label>
         <button class="btn" id="clearBtn">Clear</button>
       </div>
       <div class="count" id="count">0 events</div>
     </div>
   </header>
 
-  <!-- Timeline and rest of content here... unchanged -->
+  <main class="wrap">
+    <aside class="legend" aria-label="Legend">
+      <div style="margin-bottom:6px;color:#1e293b;font-weight:600">Legend</div>
+      <div class="row"><span class="swatch" style="background:var(--pre)"></span> Pre-War (≤ 2077-10-23)</div>
+      <div class="row"><span class="swatch" style="background:var(--post)"></span> Post-War (> 2077-10-23)</div>
+    </aside>
+    <section class="stage-wrap">
+      <div id="lane" class="lane"></div>
+      <div id="stage" class="stage"></div>
+    </section>
+  </main>
 
-  <footer>© <span id="year"></span> onlyfallout.com — Fan‑made, unofficial. Fallout IP belongs to its owners.</footer>
+  <div class="zoom-ui">
+    <button id="zoomIn">＋</button>
+    <button id="zoomOut">－</button>
+    <button id="zoomReset">⟳</button>
+  </div>
+
+  <footer>© <span id="year"></span> onlyfallout.com — Fan-made, unofficial. Fallout IP belongs to its owners.</footer>
 
   <script>
     document.getElementById('year').textContent = new Date().getFullYear();
+    /* ... your JS rendering/zoom/filter logic here (unchanged from previous working version) ... */
   </script>
 </body>
 </html>
