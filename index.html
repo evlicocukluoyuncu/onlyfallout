@@ -460,8 +460,29 @@
 
     // ====== Zoom controls ======
     function setZoom(val){
-      PX_PER_YEAR = clamp(val, MIN_PX_PER_YEAR, MAX_PX_PER_YEAR);
+      // Keep the timeline position stable around the viewport center while zooming
+      const prev = PX_PER_YEAR;
+      const next = clamp(val, MIN_PX_PER_YEAR, MAX_PX_PER_YEAR);
+      if (next === prev) return;
+
+      // Anchor at the visual center of the viewport
+      const anchorViewportY = window.innerHeight / 2; // px from top of viewport
+      const stageRect = stage.getBoundingClientRect();
+      const stageTopDoc = stageRect.top + window.scrollY; // stage top in document coords
+
+      // y within stage we are anchoring to (current scale)
+      const yInStage = Math.max(0, window.scrollY + anchorViewportY - stageTopDoc);
+      // Convert to years from START using current scale
+      const yearsFromStart = yInStage / prev;
+
+      // Apply new zoom
+      PX_PER_YEAR = next;
       render();
+
+      // Compute new scroll so that the same year stays at the same viewport Y
+      const newYInStage = yearsFromStart * PX_PER_YEAR;
+      const newScrollTop = stageTopDoc + newYInStage - anchorViewportY;
+      window.scrollTo({ top: Math.max(0, newScrollTop) });
     }
     zoomInBtn.addEventListener('click', () => setZoom(PX_PER_YEAR * ZOOM_FACTOR));
     zoomOutBtn.addEventListener('click', () => setZoom(PX_PER_YEAR / ZOOM_FACTOR));
