@@ -3,125 +3,196 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>onlyfallout.com — Fallout Vertical Timeline</title>
-  <meta name="description" content="A vertical, searchable Fallout timeline (1900–3000) with images, factions, and game filters." />
+  <title>OnlyFallout | HOME</title>
+  <meta name="description" content="OnlyFallout — a vertical, searchable Fallout mega-timeline (1900–3000) with images, factions, and game filters." />
   <link rel="icon" href="/favicon.ico">
-  <meta name="theme-color" content="#eae1d0" />
+  <meta name="theme-color" content="#3b4684" />
   <style>
     :root{
-      --bg: #eae1d0;          /* page background */
-      --panel: #0f172a;       /* cards & popup */
-      --text: #1e293b;        /* dark text for light bg */
-      --muted: #475569;       /* muted text */
-      --accent: #22d3ee;      /* UI accents */
-      --pre: #f59e0b;         /* Pre-War lane color */
-      --post:#10b981;         /* Post-War lane color */
-      --blue: #93c5fd;        /* pastel blue frame */
-      --lane-w: 10px;
-      --legend-w: 120px;
-      --gutter-l: 120px;
-      --thumb: 84px;
-      --radius: 16px;
-      --shadow: 0 20px 40px rgba(0,0,0,.25), 0 0 0 1px rgba(148,163,184,.10) inset;
+      /* Colors (new palette) */
+      --header-bg:#3b4684;     /* top bar */
+      --bg:#3f4d8e;            /* page background */
+      --lane-pre:#f59e0b;      /* Pre-War */
+      --lane-post:#10b981;     /* Post-War */
+      --text:#e9edf6;          /* light text */
+      --muted:#c7d0ea;         /* subdued text */
+      --accent:#eeb238;        /* menu color */
+      --chip:#233162;          /* chip bg */
+      --chip-border:#4b5aa0;   /* chip border */
+      --panel:#0f172a;         /* event card bg */
+      --panel-text:#f8fafc;    /* event card text */
+      --blue-ring:#93c5fd;     /* pastel blue frame */
+
+      /* Layout */
+      --lane-w:10px;
+      --legend-w:120px;
+      --gutter-l:120px;
+      --thumb:84px;
+      --shadow:0 20px 40px rgba(0,0,0,.35), 0 0 0 1px rgba(0,0,0,.08) inset;
     }
     *{box-sizing:border-box}
     html,body{height:100%}
-    body{margin:0;background:var(--bg);color:var(--text);font:16px/1.55 ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial}
+    body{
+      margin:0;background:var(--bg);color:var(--text);
+      font:16px/1.55 ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial
+    }
     a{color:var(--accent);text-decoration:none}
     a:hover{text-decoration:underline}
 
-    /* Toolbar */
-    .toolbar{position:sticky;top:0;z-index:50;background:rgba(234,225,208,.95);backdrop-filter: blur(8px);border-bottom:1px solid rgba(148,163,184,.25)}
-    .bar{max-width:1200px;margin:0 auto;padding:10px 16px;display:grid;grid-template-columns: auto 1fr auto;gap:12px;align-items:center}
+    /* ====== Header (new) ====== */
+    .header{
+      position:sticky;top:0;z-index:60;background:var(--header-bg);
+      border-bottom:1px solid rgba(0,0,0,.25);
+      box-shadow:0 6px 16px rgba(0,0,0,.25);
+    }
+    .bar{
+      max-width:1200px;margin:0 auto;padding:12px 16px;
+      display:grid;grid-template-columns:auto 1fr auto;gap:16px;align-items:center;
+    }
     .brand{display:flex;align-items:center;gap:10px}
-    .brand-logo{height:40px;width:auto;display:block}
+    .brand img{height:44px;width:auto;display:block}
 
-    .filters{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
-    .group{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
-    .group .label{color:var(--muted);font-size:12px}
-    .checkbox{display:inline-flex;align-items:center;gap:6px;border:1px solid rgba(148,163,184,.2);padding:6px 10px;border-radius:999px;background:#f1f5f9;color:var(--text);font-size:13px}
-    .checkbox input{accent-color:var(--accent)}
-    .search{display:flex;align-items:center;gap:8px;border:1px solid rgba(148,163,184,.2);padding:8px 10px;border-radius:12px;background:#f1f5f9;color:var(--text);min-width:220px}
-    .search input{all:unset;width:220px}
-    .btn{display:inline-flex;align-items:center;gap:8px;padding:8px 12px;border-radius:10px;border:1px solid rgba(148,163,184,.2);background:#f1f5f9;color:var(--text)}
-    .count{color:var(--muted);font-size:13px;text-align:right}
+    /* Center search */
+    .top-search{
+      display:flex;justify-content:center;
+    }
+    .searchbox{
+      width:min(560px, 70vw);
+      display:flex;align-items:center;gap:8px;
+      background:#ffffff;border:2px solid #0a0a0a;border-radius:999px;
+      padding:8px 14px;color:#111;
+      box-shadow:inset 0 2px 0 rgba(0,0,0,.2), 0 1px 0 rgba(255,255,255,.12);
+    }
+    .searchbox input{
+      all:unset;width:100%;font-size:15px;color:#111;
+    }
+    .searchbox input::placeholder{color:#888}
 
-    /* Legend */
-    .legend{position:sticky;top:62px;left:0;width:var(--legend-w);color:var(--muted);font-size:12px;padding:8px 8px 0 16px}
+    /* Menu */
+    .menu{display:flex;gap:24px;align-items:center}
+    .menu a{
+      color:var(--accent);
+      font-style:italic;
+      font-weight:700;
+      letter-spacing:.4px;
+      text-shadow:0 2px 0 rgba(0,0,0,.25);
+    }
+    .menu a.active{
+      text-decoration:underline;
+      text-underline-offset:6px;
+      text-decoration-thickness:3px;
+    }
+
+    /* ===== Legend + Timeline ===== */
+    .wrap{max-width:1200px;margin:0 auto;display:grid;grid-template-columns: var(--legend-w) 1fr;gap:8px}
+    .legend{position:sticky;top:88px;left:0;width:var(--legend-w);color:var(--muted);font-size:12px;padding:10px 8px 0 16px}
+    .legend .title{color:#fff;font-weight:700;margin-bottom:6px}
     .legend .row{display:flex;align-items:center;gap:8px;margin:4px 0}
     .legend .swatch{width:12px;height:12px;border-radius:3px}
 
-    /* Timeline */
-    .wrap{max-width:1200px;margin:0 auto;display:grid;grid-template-columns: var(--legend-w) 1fr;gap:8px}
     .stage-wrap{position:relative;padding-right:8px}
     .stage{position:relative;margin-left: calc(var(--gutter-l) - 40px);}
     .lane{position:absolute;left:calc(var(--gutter-l) - var(--lane-w) - 56px);width:var(--lane-w);border-radius:999px;overflow:hidden}
     .seg{width:100%}
-    .tick{position:absolute;left:calc(var(--gutter-l) - 56px);right:12px;height:1px;background:rgba(148,163,184,.25)}
+    .tick{position:absolute;left:calc(var(--gutter-l) - 56px);right:12px;height:1px;background:rgba(255,255,255,.12)}
     .tick .label{position:absolute;left:calc(-100% - 16px);top:-8px;color:var(--muted);font-size:11px;white-space:nowrap}
 
     .event{position:absolute;display:flex;align-items:center;gap:12px;transform:translateY(-50%)}
-    .thumb-wrap{width:calc(var(--thumb) + 10px);height:calc(var(--thumb) + 10px);padding:5px;border-radius:999px;background:rgba(147,197,253,.2);box-shadow:0 8px 24px rgba(0,0,0,.25);border:1px solid rgba(147,197,253,.35)}
-    .thumb{width:var(--thumb);height:var(--thumb);border-radius:999px;object-fit:cover;border:2px solid rgba(147,197,253,.6)}
-    .thumb.fallback{display:grid;place-items:center;background:#e2e8f0;color:#1e3a8a;font-weight:700;font-size:22px}
+    .thumb-wrap{
+      width:calc(var(--thumb) + 10px);height:calc(var(--thumb) + 10px);padding:5px;border-radius:999px;
+      background:rgba(147,197,253,.18);border:1px solid rgba(147,197,253,.35);box-shadow:0 8px 24px rgba(0,0,0,.35)
+    }
+    .thumb{width:var(--thumb);height:var(--thumb);border-radius:999px;object-fit:cover;border:2px solid rgba(147,197,253,.65)}
+    .thumb.fallback{display:grid;place-items:center;background:#27346b;color:#9cc7ff;font-weight:700;font-size:22px}
     .meta .edate{font-size:12px;color:var(--muted)}
 
-    /* Anchored Popup Card */
-    .card{position:absolute;left:0;top:0;transform:translateY(-50%);background:var(--panel);color:#f8fafc;border:1px solid rgba(148,163,184,.12);border-radius:16px;box-shadow:var(--shadow);padding:12px;min-width:min(52vw,520px);max-width:min(60vw,640px);z-index:5}
+    /* Popup card (anchored at event, slides out to right) */
+    .card{
+      position:absolute;left:0;top:0;transform:translateY(-50%);
+      background:var(--panel);color:var(--panel-text);
+      border:1px solid rgba(255,255,255,.08);border-radius:16px;box-shadow:var(--shadow);
+      padding:12px;min-width:min(52vw,520px);max-width:min(60vw,640px);z-index:5
+    }
     .card .title{margin:6px 0 0;font-size:18px;font-weight:700}
     .card .date{color:#cbd5e1;font-size:12px;margin-bottom:6px}
     .card .gallery{display:flex;gap:8px;flex-wrap:wrap}
     .card .gallery img{width:100%;max-height:300px;object-fit:cover;border-radius:12px}
     .card .tags{display:flex;flex-wrap:wrap;gap:8px;margin-top:8px}
-    .tag{display:inline-block;padding:6px 10px;border:1px solid rgba(148,163,184,.2);border-radius:999px;color:#f8fafc;background:#1e293b;font-size:12px}
-    .close{position:absolute;top:8px;right:8px;background:#1e293b;border:1px solid rgba(148,163,184,.2);border-radius:8px;color:#f8fafc;padding:4px 8px}
+    .tag{display:inline-block;padding:6px 10px;border:1px solid rgba(148,163,184,.25);border-radius:999px;color:#eaf2ff;background:#1e293b;font-size:12px}
+    .close{position:absolute;top:8px;right:8px;background:#1e293b;border:1px solid rgba(148,163,184,.25);border-radius:8px;color:#f8fafc;padding:4px 8px}
 
-    /* Zoom UI */
+    /* Filters group (chips) */
+    .filtersbar{display:flex;gap:10px;flex-wrap:wrap;align-items:center;margin:10px 16px}
+    .group{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+    .group .label{color:var(--muted);font-size:12px}
+    .checkbox{display:inline-flex;align-items:center;gap:6px;border:1px solid var(--chip-border);padding:6px 10px;border-radius:999px;background:var(--chip);color:#eaf0ff;font-size:13px}
+    .checkbox input{accent-color:#9cc7ff}
+
+    /* Zoom buttons */
     .zoom-ui{position:fixed;right:14px;bottom:14px;display:flex;flex-direction:column;gap:8px;z-index:60}
-    .zoom-ui button{background:#f1f5f9;border:1px solid rgba(148,163,184,.25);color:var(--text);padding:10px 12px;border-radius:10px;box-shadow:var(--shadow)}
+    .zoom-ui button{background:#f1f5f9;border:1px solid rgba(148,163,184,.25);color:#111;padding:10px 12px;border-radius:10px;box-shadow:0 10px 20px rgba(0,0,0,.25)}
 
-    /* Responsive */
+    /* Footer */
+    footer{max-width:1200px;margin:24px auto 40px;color:var(--muted);font-size:12px;padding:0 16px}
+
     @media (max-width: 980px){
       .wrap{grid-template-columns: 1fr}
       .legend{position:static;display:flex;gap:12px;width:auto;padding:8px 16px}
       .card{min-width:92vw;max-width:92vw}
+      .bar{grid-template-columns: auto 1fr auto}
     }
-
-    footer{max-width:1200px;margin:24px auto 40px;color:var(--muted);font-size:12px;padding:0 16px}
   </style>
 </head>
 <body>
-  <header class="toolbar">
+  <!-- ===== Header ===== -->
+  <header class="header">
     <div class="bar">
-      <a class="brand" href="/" aria-label="onlyfallout.com home">
-        <img class="brand-logo" src="/images/vaultboy-logo.png" alt="onlyfallout.com"/>
+      <!-- Left: logo -->
+      <a class="brand" href="/" aria-label="OnlyFallout home">
+        <img src="/images/onlyfallout-logo.png" alt="OnlyFallout logo">
       </a>
-      <div class="filters" id="filters">
-        <div class="group" id="gamesGroup"><span class="label">Games:</span></div>
-        <div class="group" id="factionsGroup"><span class="label">Factions:</span></div>
-        <label class="search" title="Search title, details, keywords, factions, games">
-          <input id="q" placeholder="Search the wasteland…"/>
+
+      <!-- Center: search -->
+      <div class="top-search">
+        <label class="searchbox" title="Search title, details, factions, keywords, games">
+          <input id="q" placeholder="Search event & locations etc.">
         </label>
-        <button class="btn" id="clearBtn">Clear</button>
       </div>
-      <div class="count" id="count">0 events</div>
+
+      <!-- Right: menu -->
+      <nav class="menu" aria-label="Primary">
+        <a href="/" class="active">TIMELINE</a>
+        <a href="/stories.html">STORIES</a>
+        <a href="/about.html">ABOUT</a>
+        <a href="/contact.html">CONTACT</a>
+      </nav>
     </div>
   </header>
 
+  <!-- ===== Legend + Timeline ===== -->
   <main class="wrap">
     <aside class="legend" aria-label="Legend">
-      <div style="margin-bottom:6px;color:#1e293b;font-weight:600">Legend</div>
-      <div class="row"><span class="swatch" style="background:var(--pre)"></span> Pre-War (≤ 2077-10-23)</div>
-      <div class="row"><span class="swatch" style="background:var(--post)"></span> Post-War (> 2077-10-23)</div>
-      <div style="margin-top:10px;color:var(--muted)">Tip: Use <b>+</b>/<b>−</b>/<b>0</b> to zoom in/out/reset.</div>
+      <div class="title">Legend</div>
+      <div class="row"><span class="swatch" style="background:var(--lane-pre)"></span> Pre-War (≤ 2077-10-23)</div>
+      <div class="row"><span class="swatch" style="background:var(--lane-post)"></span> Post-War (> 2077-10-23)</div>
     </aside>
 
     <section class="stage-wrap">
+      <!-- Filters (chips) -->
+      <div class="filtersbar" id="filters">
+        <div class="group" id="gamesGroup"><span class="label">Games:</span></div>
+        <div class="group" id="factionsGroup"><span class="label">Factions:</span></div>
+        <button class="checkbox" id="clearBtn" title="Clear all filters">Clear</button>
+        <div class="label" id="count" style="margin-left:auto">0 events</div>
+      </div>
+
+      <!-- Timeline -->
       <div id="lane" class="lane"></div>
       <div id="stage" class="stage"></div>
     </section>
   </main>
 
+  <!-- Zoom -->
   <div class="zoom-ui" aria-label="Zoom controls">
     <button id="zoomIn" title="Zoom in (+)">＋</button>
     <button id="zoomOut" title="Zoom out (−)">－</button>
@@ -130,10 +201,11 @@
 
   <footer>© <span id="year"></span> onlyfallout.com — Fan-made, unofficial. Fallout IP belongs to its owners.</footer>
 
+  <!-- ===== Script ===== -->
   <script>
     document.getElementById('year').textContent = new Date().getFullYear();
 
-    // ===== Config =====
+    /* ----- Config ----- */
     const START  = new Date('1900-01-01');
     const END    = new Date('3000-01-01');
     const CUTOFF = new Date('2077-10-23');
@@ -141,17 +213,17 @@
     const DEFAULT_PX_PER_YEAR = 6;
     const MIN_PX_PER_YEAR = 2;
     const MAX_PX_PER_YEAR = 2400;   // day-level zoom
-    const ZOOM_FACTOR = 1.25;       // multiplicative zoom
+    const ZOOM_FACTOR = 1.25;
 
     const GAME_ORDER = ['PRW','F1','F2','F3','FNV','F4','F76','TV','Non-canon'];
 
-    // ===== State =====
+    /* ----- State ----- */
     let EVENTS = [];
     let FILTER = { q: '', games: new Set(), factions: new Set() };
     let ACTIVE_ID = null;
     let PX_PER_YEAR = DEFAULT_PX_PER_YEAR;
 
-    // ===== Elements =====
+    /* ----- Elements ----- */
     const stage  = document.getElementById('stage');
     const laneEl = document.getElementById('lane');
     const qInput = document.getElementById('q');
@@ -163,28 +235,29 @@
     const zoomOutBtn = document.getElementById('zoomOut');
     const zoomResetBtn = document.getElementById('zoomReset');
 
-    // ===== Utils =====
+    /* ----- Utils ----- */
     const yearsBetween = (a,b) => (b - a) / (1000*60*60*24*365.2425);
     const yForDate = (d) => Math.max(0, yearsBetween(START, d)) * PX_PER_YEAR;
     const clamp = (n, min, max) => Math.max(min, Math.min(max, n));
     const asArray = v => Array.isArray(v) ? v : String(v||'').split(',').map(s=>s.trim()).filter(Boolean);
-    function fmtDisplayDate(ev){ return ev.display_date || new Date(ev.date).toISOString().slice(0,10); }
-    function getThumb(ev){ const imgs = asArray(ev.images); return imgs.length ? imgs[0] : null; }
+    const fmtDisplayDate = ev => ev.display_date || new Date(ev.date).toISOString().slice(0,10);
+    const getThumb = ev => { const imgs = asArray(ev.images); return imgs.length ? imgs[0] : null; };
+    const escapeHTML = s => (s||'').replace(/[&<>\"']/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));
 
-    // ===== Build pieces =====
+    /* ----- Build lane & ticks ----- */
     function buildLane(totalH){
       laneEl.style.height = totalH + 'px';
-      const preH = clamp(yForDate(CUTOFF), 0, totalH);
+      const preH = Math.max(0, yForDate(CUTOFF));
       laneEl.innerHTML =
-        '<div class="seg" style="height:'+preH+'px;background:var(--pre)"></div>' +
-        '<div class="seg" style="height:'+Math.max(0,totalH-preH)+'px;background:var(--post)"></div>';
+        '<div class="seg" style="height:'+preH+'px;background:var(--lane-pre)"></div>' +
+        '<div class="seg" style="height:'+Math.max(0,totalH-preH)+'px;background:var(--lane-post)"></div>';
     }
     function buildTicks(totalH){
       const startY = START.getUTCFullYear();
       const endY = END.getUTCFullYear();
-      const useYears = PX_PER_YEAR >= 300; // switch to yearly when very zoomed
+      const useYears = PX_PER_YEAR >= 300; // more granular when zoomed
       for(let y = Math.ceil(startY/10)*10; y <= endY; y += (useYears?1:10)){
-        const yPos = yForDate(new Date(y+'-01-01T00:00:00Z'));
+        const yPos = yForDate(new Date(`${y}-01-01T00:00:00Z`));
         const tick = document.createElement('div');
         tick.className = 'tick';
         tick.style.top = yPos + 'px';
@@ -196,6 +269,7 @@
       }
     }
 
+    /* ----- Filters / search ----- */
     function passFilters(ev){
       const q = FILTER.q.trim().toLowerCase();
       if (q){
@@ -216,6 +290,7 @@
       return true;
     }
 
+    /* ----- Render timeline ----- */
     function render(){
       stage.innerHTML = '';
       const totalH = Math.max(1200, yForDate(END));
@@ -226,11 +301,11 @@
       const shown = EVENTS.filter(passFilters);
       countEl.textContent = shown.length + ' event' + (shown.length===1?'':'s');
 
-      // anti-collision: fan out close events into columns
+      // fan-out for close events
       const THRESH = parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--thumb')) + 14;
       let lastY = -Infinity, col = 0;
 
-      shown.forEach(ev => {
+      shown.forEach(ev=>{
         const y = yForDate(new Date(ev.date));
         if (Math.abs(y - lastY) < THRESH) col = (col + 1) % 4; else col = 0;
         lastY = y;
@@ -248,8 +323,8 @@
         const src = getThumb(ev);
         let thumb;
         if (src){
-          thumb = document.createElement('img'); thumb.className = 'thumb';
-          thumb.loading = 'lazy'; thumb.alt = ev.title || ev.id; thumb.src = src;
+          thumb = document.createElement('img');
+          thumb.className = 'thumb'; thumb.loading='lazy'; thumb.alt = ev.title || ev.id; thumb.src = src;
         } else {
           thumb = document.createElement('div'); thumb.className = 'thumb fallback'; thumb.textContent = '？';
         }
@@ -261,15 +336,15 @@
 
         el.appendChild(wrap); el.appendChild(meta);
         stage.appendChild(el);
-
         if (ACTIVE_ID === ev.id){ attachCard(ev, y, el); }
       });
     }
 
+    /* ----- Cards ----- */
     function attachCard(ev, y, anchorEl){
       const old = document.getElementById('openCard'); if (old) old.remove();
       const card = document.createElement('div'); card.className = 'card'; card.id = 'openCard';
-      const anchorLeft = anchorEl.offsetLeft;
+      const anchorLeft = anchorEl ? anchorEl.offsetLeft : -28;
       const thumbWrap = parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--thumb')) + 10;
       const left = anchorLeft + thumbWrap + 16;
       card.style.top = y + 'px'; card.style.left = left + 'px';
@@ -301,19 +376,17 @@
           '</div>');
       }
 
-      parts.push('<div style="margin-top:10px"><button class="btn" onclick="copyLink(\''+encodeURIComponent(ev.id)+'\')">Copy link</button></div>');
-
+      parts.push('<div style="margin-top:10px"><button class="checkbox" onclick="copyLink(\''+encodeURIComponent(ev.id)+'\')">Copy link</button></div>');
       card.innerHTML = parts.join('');
       stage.appendChild(card);
     }
-
     function openCard(id, updateHash){
       const ev = EVENTS.find(e => e.id === id); if (!ev) return;
       ACTIVE_ID = id;
       if (updateHash){ history.replaceState(null, '', '#'+encodeURIComponent(id)); }
       const y = yForDate(new Date(ev.date));
       const anchorEl = [...stage.querySelectorAll('.event')].find(btn => (btn.querySelector('.meta')?.textContent||'').includes(ev.title||'')) || null;
-      attachCard(ev, y, anchorEl || {offsetLeft:-28});
+      attachCard(ev, y, anchorEl);
     }
     function closeCard(){
       ACTIVE_ID = null;
@@ -331,15 +404,13 @@
       const url = location.origin + location.pathname + '#'+id;
       navigator.clipboard.writeText(url).then(()=>alert('Link copied to clipboard'));
     }
-    function escapeHTML(s){ return (s||'').replace(/[&<>\"']/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m])); }
 
-    // ===== Filters UI =====
+    /* ----- Filters UI ----- */
     function uniqueValues(collector){
       const set = new Set(); EVENTS.forEach(ev => collector(ev).forEach(v => set.add(v)));
       return Array.from(set);
     }
     function renderFilterCheckboxes(){
-      // Games
       const allGames = uniqueValues(ev => asArray(ev.game)).sort((a,b)=>{
         const ia = GAME_ORDER.indexOf(a), ib = GAME_ORDER.indexOf(b);
         return (ia===-1?999:ia) - (ib===-1?999:ib);
@@ -353,7 +424,7 @@
         cb.addEventListener('change',()=>{ if(cb.checked) FILTER.games.add(g.toLowerCase()); else FILTER.games.delete(g.toLowerCase()); render(); });
         gamesGroup.appendChild(lbl);
       });
-      // Factions
+
       const allFactions = uniqueValues(ev => asArray(ev.factions)).sort((a,b)=>a.localeCompare(b));
       factionsGroup.querySelectorAll('label.checkbox').forEach(n=>n.remove());
       allFactions.forEach(f=>{
@@ -366,7 +437,7 @@
       });
     }
 
-    // ===== Search/Clear =====
+    /* ----- Search/Clear ----- */
     qInput.addEventListener('input', ()=>{ FILTER.q = qInput.value; render(); });
     clearBtn.addEventListener('click', ()=>{
       FILTER={ q:'', games:new Set(), factions:new Set() };
@@ -376,12 +447,13 @@
       render();
     });
 
-    // ===== Zoom with viewport anchoring =====
+    /* ----- Zoom (anchored) ----- */
     function setZoom(val){
       const prev = PX_PER_YEAR;
       const next = clamp(val, MIN_PX_PER_YEAR, MAX_PX_PER_YEAR);
       if (next === prev) return;
 
+      // keep the same year at viewport center
       const anchorViewportY = window.innerHeight / 2;
       const stageRect = stage.getBoundingClientRect();
       const stageTopDoc = stageRect.top + window.scrollY;
@@ -395,14 +467,14 @@
       const newScrollTop = stageTopDoc + newYInStage - anchorViewportY;
       window.scrollTo({ top: Math.max(0, newScrollTop) });
     }
-    zoomInBtn.addEventListener('click', ()=>setZoom(PX_PER_YEAR * ZOOM_FACTOR));
-    zoomOutBtn.addEventListener('click', ()=>setZoom(PX_PER_YEAR / ZOOM_FACTOR));
+    zoomInBtn.addEventListener('click', ()=>setZoom(PX_PER_YEAR * 1.25));
+    zoomOutBtn.addEventListener('click', ()=>setZoom(PX_PER_YEAR / 1.25));
     zoomResetBtn.addEventListener('click', ()=>setZoom(DEFAULT_PX_PER_YEAR));
     window.addEventListener('keydown', (e)=>{
-      const tag = (e.target && e.target.tagName) ? e.target.tagName.toLowerCase() : '';
-      if (tag==='input' || tag==='textarea' || e.ctrlKey || e.metaKey || e.altKey) return;
-      if (e.key==='+' || e.key==='='){ e.preventDefault(); setZoom(PX_PER_YEAR * ZOOM_FACTOR); }
-      else if (e.key==='-' || e.key==='_'){ e.preventDefault(); setZoom(PX_PER_YEAR / ZOOM_FACTOR); }
+      const tag=(e.target&&e.target.tagName)?e.target.tagName.toLowerCase():'';
+      if (tag==='input'||tag==='textarea'||e.ctrlKey||e.metaKey||e.altKey) return;
+      if (e.key==='+'||e.key==='='){ e.preventDefault(); setZoom(PX_PER_YEAR*1.25); }
+      else if (e.key==='-'||e.key==='_'){ e.preventDefault(); setZoom(PX_PER_YEAR/1.25); }
       else if (e.key==='0'){ e.preventDefault(); setZoom(DEFAULT_PX_PER_YEAR); }
       else if (e.key==='Escape'){ closeCard(); }
     });
@@ -412,11 +484,11 @@
       if (!within) closeCard();
     });
 
-    // ===== Boot =====
+    /* ----- Boot ----- */
     fetch('/events.json', { cache: 'no-cache' })
-      .then(r => r.json())
-      .then(data => {
-        EVENTS = (data||[]).map(ev => ({
+      .then(r=>r.json())
+      .then(data=>{
+        EVENTS = (data||[]).map(ev=>({
           ...ev,
           game: asArray(ev.game),
           factions: asArray(ev.factions),
@@ -434,7 +506,7 @@
       })
       .catch(err=>{
         console.error('Failed to load events.json', err);
-        stage.innerHTML = '<div style="padding:20px;color:#475569">Could not load events. Ensure <code>events.json</code> exists in the repo root.</div>';
+        stage.innerHTML = '<div style="padding:20px;color:var(--muted)">Could not load events. Ensure <code>events.json</code> exists in the repo root.</div>';
       });
 
     window.addEventListener('hashchange', ()=>{
@@ -442,7 +514,5 @@
       if (id) openCard(id,false);
     });
   </script>
-
-  <script>document.getElementById('year').textContent=new Date().getFullYear()</script>
 </body>
 </html>
